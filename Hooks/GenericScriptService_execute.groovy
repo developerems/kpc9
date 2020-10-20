@@ -67,7 +67,7 @@ class GenericScriptService_execute extends ServiceHook{
 				readAction = true;
 				scrptName = "ELL38I_DETAIL";
 			}
-			if (customAttribute.getName() == "scrName" && customAttribute.getValue() == "ELL38I_DETAIL") {
+			if (customAttribute.getName() == "scrName" && customAttribute.getValue() == "ELL685_DETAIL") {
 				readAction = true
 				scrptName = "ELL685_DETAIL"
 			}
