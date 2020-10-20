@@ -1,3 +1,4 @@
+package KPC.HOOKS
 /**
  * @EMS Mar 2019
  *
@@ -7,9 +8,32 @@
 
 import javax.naming.InitialContext
 
+import com.mincom.ellipse.attribute.Attribute
+import com.mincom.ellipse.ejra.mso.GenericMsoRecord
 import com.mincom.enterpriseservice.ellipse.*
+import com.mincom.enterpriseservice.exception.EnterpriseServiceOperationException
 import com.mincom.ellipse.hook.hooks.ServiceHook
+import com.mincom.enterpriseservice.ellipse.contractitem.ContractItemService
+import com.mincom.enterpriseservice.ellipse.contractitem.ContractItemServiceModifyPortMileRequestDTO
+import com.mincom.enterpriseservice.ellipse.contract.ContractServiceModifyRequestDTO
+import com.mincom.enterpriseservice.ellipse.contract.ContractServiceCreateRequestDTO
+import com.mincom.enterpriseservice.ellipse.contract.ContractServiceRetrieveRequestDTO
+import com.mincom.enterpriseservice.ellipse.variations.VariationsServiceRetrieveRequestDTO
+import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceRetrieveRequestDTO
+import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceRetrieveReplyDTO
+import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceRetrieveReplyCollectionDTO
+import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceApproveReplyDTO
+import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceApproveRequestDTO
+import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceDeleteRequestDTO
+import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceDeleteReplyDTO
 import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceCreateRequestDTO
+import com.mincom.enterpriseservice.ellipse.contract.ContractServiceCreateReplyDTO
+import com.mincom.enterpriseservice.ellipse.stdtext.StdTextService
+import com.mincom.enterpriseservice.ellipse.stdtext.StdTextServiceCreateReplyDTO
+import com.mincom.enterpriseservice.ellipse.stdtext.StdTextServiceSetTextReplyDTO
+import com.mincom.enterpriseservice.ellipse.stdtext.StdTextServiceDeleteReplyDTO
+import com.mincom.enterpriseservice.ellipse.stdtext.StdTextServiceAppendReplyDTO
+import com.mincom.ellipse.service.ServiceDTO;
 import com.mincom.enterpriseservice.exception.*
 import groovy.sql.Sql
 import com.mincom.ellipse.client.connection.*
@@ -49,12 +73,12 @@ class ValuationsService_create extends ServiceHook {
 	String EQP_NO = "";
 	
 	@Override
-	Object onPreExecute(Object input) {
+	public Object onPreExecute(Object input) {
 		log.info("Hooks ValuationsService_create onPreExecute logging.version: ${hookVersion}")
 		ValuationsServiceCreateRequestDTO c = (ValuationsServiceCreateRequestDTO) input;
 		def QueryRes1 = sql.firstRow("select * from msf384 where DSTRCT_CODE = '"+tools.commarea.District.trim()+"' and CONTRACT_NO = '"+c.getContractNo()+"'");
 		log.info ("QueryRes1 : " + QueryRes1);
-		if (QueryRes1){
+		if (!QueryRes1.equals(null)){
 			if (QueryRes1.STATUS_384.trim().equals("HL")) {
 				throw new EnterpriseServiceOperationException(
 					new ErrorMessageDTO(
@@ -71,13 +95,12 @@ class ValuationsService_create extends ServiceHook {
 	}
 	
 	@Override
-	Object onPostExecute(Object input, Object result) {
+	public Object onPostExecute(Object input, Object result) {
 		log.info("Hooks ValuationsService_create onPostExecute logging.version: ${hookVersion}")
 				
 		return result
 	}
-
-	String GetUserEmpID(String user, String district) {
+	public String GetUserEmpID(String user, String district) {
 		String EMP_ID = "";
 		def QRY1;
 		QRY1 = sql.firstRow("select * From msf020 where ENTRY_TYPE = 'S' and trim(ENTITY) = trim('"+user+"') and DSTRCT_CODE = '"+district+"'");
@@ -86,8 +109,7 @@ class ValuationsService_create extends ServiceHook {
 		}
 		return EMP_ID;
 	}
-
-	def GetNowDateTime() {
+	public def GetNowDateTime() {
 		Date InPer = new Date();
 		
 		Calendar cal = Calendar.getInstance();

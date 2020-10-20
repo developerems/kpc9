@@ -42,7 +42,7 @@ public class AssetList extends GenericScriptPlugin implements GenericScriptExecu
 	   Integer maxNumberOfObjects, RestartAttributes restartAttributes) throws FatalException {
 	   log.info("Exec for coll AssetList : " + version )
 	   RequestAttributes reqAtt = requestAttributes
-	   String strSearch = reqAtt.getAttributeStringValue("parAtt");
+	   String strSearch = reqAtt.getAttributeStringValue("parAssetNo");
 	   def results = new GenericScriptResults();
 	   
 	   String StrSQL = ""
@@ -62,12 +62,12 @@ public class AssetList extends GenericScriptPlugin implements GenericScriptExecu
 				   GenericScriptResult result = new GenericScriptResult()
 				   result.addAttribute("resCode", it.ASSET_NO);
 				   result.addAttribute("resDesc", it.ASSET_DESC);
-				   result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				   result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				   results.add(result);
 			   })
 		   }else {
-			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			   //MaxInst = MaxInst + maxNumberOfObjects
 			   StrSQL = "select row_number () over(order by a.ASSET_NO) NO,a.* from (" +
 			               "SELECT DISTINCT a.ASSET_NO,case when a.ASSET_TY = 'A' then trim(b.ASSET_DESC) else trim(c.item_name_1) || trim(c.item_name_2) end ASSET_DESC from msf685 a " +
@@ -81,7 +81,7 @@ public class AssetList extends GenericScriptPlugin implements GenericScriptExecu
 				   MaxInst = it.NO
 				   result.addAttribute("resCode", it.ASSET_NO);
 				   result.addAttribute("resDesc", it.ASSET_DESC);
-				   result.addAttribute("LAST_ROW", MaxInst.toString());
+				   result.addAttribute("lastRow", MaxInst.toString());
 				   results.add(result);
 			   })
 		   }
@@ -101,12 +101,12 @@ public class AssetList extends GenericScriptPlugin implements GenericScriptExecu
 				   GenericScriptResult result = new GenericScriptResult();
 				   result.addAttribute("resCode", it.ASSET_NO);
 				   result.addAttribute("resDesc", it.ASSET_DESC);
-				   result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				   result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				   results.add(result);
 			   })
 		   }else {
-			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			   //MaxInst = MaxInst + maxNumberOfObjects
 			   StrSQL = "select row_number () over(order by a.ASSET_NO) NO,a.* from (" +
 			               "SELECT DISTINCT a.ASSET_NO,case when a.ASSET_TY = 'A' then trim(b.ASSET_DESC) else trim(c.item_name_1) || trim(c.item_name_2) end ASSET_DESC from msf685 a " +
@@ -120,7 +120,7 @@ public class AssetList extends GenericScriptPlugin implements GenericScriptExecu
 				   MaxInst = it.NO
 				   result.addAttribute("resCode", it.CIC_NO);
 				   result.addAttribute("resDesc", it.CIC_DESC);
-				   result.addAttribute("LAST_ROW", MaxInst.toString());
+				   result.addAttribute("lastRow", MaxInst.toString());
 				   results.add(result);
 			   })
 		   }

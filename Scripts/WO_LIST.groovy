@@ -91,7 +91,7 @@ public class WO_LIST extends GenericScriptPlugin implements GenericScriptExecute
 		   
 		   if (restartAttributes.equals(null)){
 			   StrSQL = "select row_number () over(order by WORK_ORDER) NO,WORK_ORDER,WO_DESC from msf620 " +
-						   "where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and (upper(WORK_ORDER) like '%'||upper('"+strSearch+"')||'%') or (upper(WO_DESC) like '%'||upper('"+strSearch+"')||'%') " +QryCon+
+						   "where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and ((upper(WORK_ORDER) like '%'||upper('"+strSearch+"')||'%') or (upper(WO_DESC) like '%'||upper('"+strSearch+"')||'%')) " +QryCon+
 						   "ORDER BY WORK_ORDER,WO_DESC OFFSET 0 ROWS FETCH NEXT "+maxNumberOfObjects.toString()+" ROWS ONLY" ;
 			   log.info ("StrSQL : " + StrSQL);
 			   sql.eachRow(StrSQL, {
@@ -106,7 +106,7 @@ public class WO_LIST extends GenericScriptPlugin implements GenericScriptExecute
 			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			   //MaxInst = MaxInst + maxNumberOfObjects
 			   StrSQL = "select row_number () over(order by WORK_ORDER) NO,WORK_ORDER,WO_DESC from msf620 " +
-						   "where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and (upper(WORK_ORDER) like '%'||upper('"+strSearch+"')||'%') or (upper(WO_DESC) like '%'||upper('"+strSearch+"')||'%') " +QryCon+
+						   "where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and ((upper(WORK_ORDER) like '%'||upper('"+strSearch+"')||'%') or (upper(WO_DESC) like '%'||upper('"+strSearch+"')||'%')) " +QryCon+
 						   "ORDER BY WORK_ORDER,WO_DESC OFFSET "+MaxInst.toString()+" ROWS FETCH NEXT "+maxNumberOfObjects.toString()+" ROWS ONLY" ;
 			   log.info ("StrSQL : " + StrSQL);
 			   sql.eachRow(StrSQL, {

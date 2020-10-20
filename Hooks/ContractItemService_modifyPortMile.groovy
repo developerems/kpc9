@@ -211,7 +211,6 @@ class ContractItemService_modifyPortMile extends ServiceHook {
 		}
 		return null
 	}
-
 	private String createText(String KEY, String[] CONTENT){
 		String MESSAGE = "";
 		try

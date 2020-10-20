@@ -40,7 +40,7 @@ public class ELL38I_SEARCH extends GenericScriptPlugin implements GenericScriptE
 			String INV_BY = reqAtt.getAttributeStringValue("parInpBy");
 			String INV_ST = reqAtt.getAttributeStringValue("parInvStat");
 			
-			if (CNT == null) {
+			if (CNT.equals(null)) {
 				CNT = "";
 			}else {
 				def QRY1;

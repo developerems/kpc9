@@ -1,3 +1,4 @@
+package KPC.HOOKS
 /**
  * @EMS Mar 2019
  *
@@ -44,20 +45,20 @@ class VariationsService_create extends ServiceHook {
 	InitialContext initial = new InitialContext()
 	Object CAISource = initial.lookup("java:jboss/datasources/ApplicationDatasource")
 	def sql = new Sql(CAISource)
-
 	@Override
-	Object onPreExecute(Object input) {
+	public Object onPreExecute(Object input) {
 		log.info("Hooks VariationsService_create onPreExecute logging.version: ${hookVersion}")
 
 		VariationsServiceCreateRequestDTO c = (VariationsServiceCreateRequestDTO) input
 		log.info("VariationsServiceCreateRequestDTO: " + c)
-		if (c.getContractNumber()) {
-			VarPrefix = ""
-			def QRY1 = sql.firstRow("select * from msf071 where ENTITY_TYPE = 'CTR' and REF_NO = '001' and trim(ENTITY_VALUE) = trim('${c.getContractNumber()}')")
+		if (!c.getContractNumber().equals(null)) {
+			VarPrefix = "";
+			def QRY1;
+			QRY1 = sql.firstRow("select * from msf071 where ENTITY_TYPE = 'CTR' and REF_NO = '001' and trim(ENTITY_VALUE) = trim('" +c.getContractNumber() + "')");
 			log.info ("FIND CTR  : " + QRY1);
-			if (QRY1){
+			if (!QRY1.equals(null)){
 				VarPrefix = QRY1.REF_CODE.trim()
-				if (VarPrefix == "Z"){
+				if (VarPrefix.equals("Z")){
 					throw new EnterpriseServiceOperationException(
 					new ErrorMessageDTO(
 					"9999", "COULD NOT USE PREFIX \"Z\", RESERVED BY SYSTEM", "variationNumber", 0, 0))
@@ -125,7 +126,7 @@ class VariationsService_create extends ServiceHook {
 	}
 
 	@Override
-	Object onPostExecute(Object input, Object result) {
+	public Object onPostExecute(Object input, Object result) {
 		log.info("Hooks VariationsService_create onPostExecute logging.version: ${hookVersion}")
 		VariationsServiceCreateReplyDTO d = (VariationsServiceCreateReplyDTO) result
 		GetNowDateTime();
@@ -161,8 +162,7 @@ class VariationsService_create extends ServiceHook {
 		log.info("New Var No: " + d.getVariationNumber());
 		return result
 	}
-
-	String GetUserEmpID(String user, String district) {
+	public String GetUserEmpID(String user, String district) {
 		String EMP_ID = "";
 		def QRY1;
 		QRY1 = sql.firstRow("select * From msf020 where ENTRY_TYPE = 'S' and trim(ENTITY) = trim('"+user+"') and DSTRCT_CODE = '"+district+"'");
@@ -171,8 +171,7 @@ class VariationsService_create extends ServiceHook {
 		}
 		return EMP_ID;
 	}
-
-	def GetNowDateTime() {
+	public def GetNowDateTime() {
 		Date InPer = new Date();
 
 		Calendar cal = Calendar.getInstance();

@@ -92,12 +92,12 @@ public class ell685Search extends GenericScriptPlugin implements GenericScriptEx
 					   result.addAttribute("parAssetTy", it.ASSET_TY);
 					   result.addAttribute("parBookTy", it.BOOK_TY);
 					   result.addAttribute("parStartPeriod", it.START_PERIOD);
-					   result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+					   result.addAttribute("lastRow", maxNumberOfObjects.toString());
 					   results.add(result);
 				   })
 			}else {
-				   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-				   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+				   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+				   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 				   
 				   StrSQL = "select a.*,trim(b.SUB_ASSET_DESC) SUB_ASSET_DESC from (select " + 
 								"substr(ENTITY_VALUE,1,4) DSTRCT_CODE,substr(ENTITY_VALUE,5,12) ASSET_NO, " +
@@ -117,7 +117,7 @@ public class ell685Search extends GenericScriptPlugin implements GenericScriptEx
 					   result.addAttribute("parAssetTy", it.ASSET_TY);
 					   result.addAttribute("parBookTy", it.BOOK_TY);
 					   result.addAttribute("parStartPeriod", it.START_PERIOD);
-					   result.addAttribute("LAST_ROW", MaxInst.toString());
+					   result.addAttribute("lastRow", MaxInst.toString());
 					   results.add(result);
 				   })
 			}

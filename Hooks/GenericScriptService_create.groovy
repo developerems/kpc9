@@ -51,6 +51,14 @@ class GenericScriptService_create extends ServiceHook{
 				readAction = true;
 				scrptName = "ELL38C_DETAIL";
 			}
+			if (customAttribute.getName() == "assetNo") {
+				readAction = true;
+				scrptName = "ell685Detail";
+			}
+			if (customAttribute.getName() == "scrName" && customAttribute.getValue() == "ell685Detail") {
+				readAction = true;
+				scrptName = "ell685Detail";
+			}
 		}
 		if ((scName == null || scName == "") && (scrptName != "")) {
 			ScriptName seScName = new ScriptName();

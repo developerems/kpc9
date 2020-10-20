@@ -1,3 +1,4 @@
+package KPC.HOOKS
 /**
  * @EMS Mar 2019
  *
@@ -63,6 +64,7 @@ class WorkService_read extends ServiceHook {
 		}else {
 			ATT[0].setValue("");
 		}
+
 
 		def QRY2 = sql.firstRow("select NVL(TO_CHAR(sum(AMT),'999,999,999,999.99'),0) AMT from(select distinct case when REQ_232_TYPE = 'I' then B.AUTHSD_TOT_AMT else C.AUTHSD_TOT_AMT end  AMT  from msf232 A LEFT OUTER JOIN MSF140 B ON (A.DSTRCT_CODE = B.DSTRCT_CODE AND substr(trim(A.REQUISITION_NO),1,6) = trim(B.IREQ_NO)) LEFT OUTER JOIN MSF230 C ON (A.DSTRCT_CODE = C.DSTRCT_CODE AND substr(trim(A.REQUISITION_NO),1,6) = trim(C.PREQ_NO))"+
 				"where A.REQ_232_TYPE in ('I','P') AND TRIM(A.WORK_ORDER) = '" + WoNo.trim()+"')");

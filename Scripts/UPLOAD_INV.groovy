@@ -1,5 +1,10 @@
 /**
 * @EMS Feb 2019
+* 20200905 - a9rj2193 - Ratna J - case #003418
+*          Because account code of add tax transaction is reclassed by MSO904, 
+*          when an invoice contract with add tax is canceled, the canceled transaction still
+*          uses original account code.  
+*          Add strUpd to update MSF263 also after MSO260 finishes the invoice loading process.
 *
 * 20190217 - a9ra5213 - Ricky Afriano - KPC UPGRADE
 *            Initial Coding - Upload Invoice using MSO260 in ELL38I Screen 
@@ -85,9 +90,9 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 		RequestAttributes reqAtt = requestAttributes[0];
 		District = securityToken.getDistrict();
 		String CNT_NO,INV_NO,CIC_NO,CONT_SUPP;
-		INV_NO = reqAtt.getAttributeStringValue("detInvNo");
-		CNT_NO = reqAtt.getAttributeStringValue("detCntNo");
-		CONT_SUPP = reqAtt.getAttributeStringValue("contSupp");
+		INV_NO = reqAtt.getAttributeStringValue("DET_INV_NO");
+		CNT_NO = reqAtt.getAttributeStringValue("DET_CNT_NO");
+		CONT_SUPP = reqAtt.getAttributeStringValue("CONT_SUPP");
 		String EMP_ID = GetUserEmpID(securityToken.getUserId(), securityToken.getDistrict());
 		//Cek Security
         def QRY0;
@@ -130,7 +135,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 				StrErr = "YOU DO NOT HAVE AUTHORITY IAPP"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("creCntNo")
+				//err.setFieldId("CRE_CNT_NO")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -140,7 +145,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 				StrErr = "YOU DO NOT HAVE AUTHORITY INIT"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("creCntNo")
+				//err.setFieldId("CRE_CNT_NO")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -150,7 +155,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 				StrErr = "YOU DO NOT HAVE AUTHORITY INTO"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("creCntNo")
+				//err.setFieldId("CRE_CNT_NO")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -160,7 +165,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 				StrErr = "YOUR SECURITY PROFILE VALUE FOR MSO260 SHOULD BE 1"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("creCntNo")
+				//err.setFieldId("CRE_CNT_NO")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -170,7 +175,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 				StrErr = "YOUR SECURITY PROFILE VALUE FOR MSO261 SHOULD BE 9"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("creCntNo")
+				//err.setFieldId("CRE_CNT_NO")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -180,7 +185,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 				StrErr = "YOUR SECURITY PROFILE VALUE FOR MSO904 SHOULD BE 9"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("creCntNo")
+				//err.setFieldId("CRE_CNT_NO")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -190,7 +195,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 			StrErr = "USER SECURITY NOT FOUND"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			//err.setFieldId("creCntNo")
+			//err.setFieldId("CRE_CNT_NO")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -199,44 +204,44 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 		
 		
 		String DET_INV_DATE = "";
-		if(reqAtt.getAttributeDateValue("detInvDate").equals(null)) {
+		if(reqAtt.getAttributeDateValue("DET_INV_DATE").equals(null)) {
 			StrErr = "INVOICE DATE REQUIRED!"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("detInvDate")
+			err.setFieldId("DET_INV_DATE")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
 			return results
 		}
-		DateToString(reqAtt.getAttributeDateValue("detInvDate"));
+		DateToString(reqAtt.getAttributeDateValue("DET_INV_DATE"));
 		DET_INV_DATE = strCrDT;
 		String INV_REC_DATE = "";
-		if (!reqAtt.getAttributeDateValue("invRecDate").equals(null)) {
-			DateToString(reqAtt.getAttributeDateValue("invRecDate"));
+		if (!reqAtt.getAttributeDateValue("INV_REC_DATE").equals(null)) {
+			DateToString(reqAtt.getAttributeDateValue("INV_REC_DATE"));
 			INV_REC_DATE = strCrDT;
 		}else {
 			INV_REC_DATE = " ";
 		}
 		String BK_CODE = "";
-		BK_CODE = reqAtt.getAttributeStringValue("bkCode");
+		BK_CODE = reqAtt.getAttributeStringValue("BK_CODE");
 		if(BK_CODE.equals(null)) {
 			StrErr = "BANK BRANCH CODE REQUIRED!"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("bkCode")
+			err.setFieldId("BK_CODE")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
 			return results
 		}
 		String BK_ACCT_NO = "";
-		BK_ACCT_NO = reqAtt.getAttributeStringValue("bkAcctNo");
+		BK_ACCT_NO = reqAtt.getAttributeStringValue("BK_ACCT_NO");
 		if(BK_ACCT_NO.equals(null)) {
 			StrErr = "BANK ACCOUNT NO REQUIRED!"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("bkAcctNo")
+			err.setFieldId("BK_ACCT_NO")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -254,7 +259,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 			StrErr = "INVALID CONTRACT NUMBER / DOESN'T EXIST"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("creCntNo")
+			err.setFieldId("CRE_CNT_NO")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -268,7 +273,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 			StrErr = "INVOICE NUMBER DOES NOT EXIST"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("detInvNo")
+			err.setFieldId("DET_INV_NO")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -278,7 +283,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 			StrErr = "CIC INVOICE STATUS MUST BE SPACE"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("detInvStat")
+			err.setFieldId("DET_INV_STAT")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -290,7 +295,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 			StrErr = "INVOICE VALUE REQUIRED!"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("detInvVal")
+			err.setFieldId("DET_INV_VAL")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -302,7 +307,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 			StrErr = "CIC INVOICE NOT BALANCE!"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("detBal")
+			err.setFieldId("DET_BAL")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -328,7 +333,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 				StrErr = "ONE OF CIC HAS BEEN CANCELED : " + it.CIC_NO
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("grd1CicNo")
+				err.setFieldId("GRD1_CIC_NO")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -362,7 +367,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 							StrErr = "VALUATION FOR CIC "+CIC_NO+" NOT APPROVED!"
 							SetErrMes();
 							com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-							//err.setFieldId("detBal")
+							//err.setFieldId("DET_BAL")
 							result.addError(err)
 							results.add(result)
 							RollErrMes();
@@ -398,7 +403,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 						StrErr = "ADD TAX / WH TAX REQUIRED!"
 						SetErrMes();
 						com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-						//err.setFieldId("detBal")
+						//err.setFieldId("DET_BAL")
 						result.addError(err)
 						results.add(result)
 						RollErrMes();
@@ -446,16 +451,16 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 		BANK_ACCT_NO1I = BK_ACCT_NO;
 		log.info("BANK_ACCT_NO1I : " + BANK_ACCT_NO1I )
 		
-		if (reqAtt.getAttributeStringValue("intComm2").equals(null)) {
+		if (reqAtt.getAttributeStringValue("INT_COMM2").equals(null)) {
 			INT_CMT = "";
 		}else {
-			INT_CMT = reqAtt.getAttributeStringValue("intComm2");
+			INT_CMT = reqAtt.getAttributeStringValue("INT_COMM2");
 		}
 		
-		if (reqAtt.getAttributeStringValue("extComm2").equals(null)) {
+		if (reqAtt.getAttributeStringValue("EXT_COMM2").equals(null)) {
 			EXT_CMT = "";
 		}else {
-			EXT_CMT = reqAtt.getAttributeStringValue("extComm2");
+			EXT_CMT = reqAtt.getAttributeStringValue("EXT_COMM2");
 		}
 		
 		invoke_MSO260();
@@ -484,7 +489,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 					QRY2B = sql.firstRow("select a.EXT_INV_NO,b.inv_item_no,a.CONTRACT_NO,b.VALN_NO,substr(trim(c.ENTITY_VALUE),-8) CIC_NO,d.WORK_ORDER, " +
 						"replace(e.DSTRCT_ACCT_CODE,a.DSTRCT_CODE,'') WO_ACCT_CODE,d.CIC_TYPE,f.CIC_ITEM_NO, " +
 						"g.GL_ACCOUNT,h.account_code OLD_ACCT,a.LOADED_DATE,h.ATAX_CODE, " +
-						"h.DSTRCT_CODE,h.PROCESS_DATE||h.TRANSACTION_NO||h.USERNO||h.REC900_TYPE TRANS_ID " +
+						"h.DSTRCT_CODE,h.PROCESS_DATE||h.TRANSACTION_NO||h.USERNO||h.REC900_TYPE TRANS_ID, a.INV_NO INT_INV_NO, a.SUPPLIER_NO " +
 						"from msf260 a " +
 						"left outer join msf26a b on (a.supplier_no = b.supplier_no and a.inv_no = b.inv_no) " +
 						"left outer join msf071 c on (trim(c.ENTITY_TYPE) = 'CIV' and trim(c.ENTITY_VALUE) like trim(a.dstrct_code)||trim(a.CONTRACT_NO)||'%' and length(trim(replace(c.ENTITY_VALUE,trim(a.dstrct_code)||trim(a.CONTRACT_NO)))) = 8 and trim(ref_code) = trim(b.VALN_NO)) " +
@@ -497,6 +502,11 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 						"where a.supplier_no = '"+QRY1.SUPPLIER_NO+"' and a.EXT_INV_NO = '"+INV_NO+"' and a.DSTRCT_CODE = '"+securityToken.getDistrict()+"' and b.INV_ITEM_NO = '"+it.inv_item_no+"'");
 					if(!QRY2B.equals(null)) {
 						if(!QRY2B.TRANS_ID.equals(null)) {
+						    String strUpd = " ";
+							log.info ("QRY2B - LS");
+							strUpd = ("update msf263 set dr_account_cde = '" + QRY2B.GL_ACCOUNT + "' where inv_no = '" + QRY2B.INT_INV_NO + "' and inv_supplier_no = '" + QRY2B.SUPPLIER_NO + "' and inv_item_no = '" + it.inv_item_no + "'");
+							log.info ("Upd MSF263: " + strUpd);
+							sql.execute(strUpd);
 							invoke_MSO904(securityToken.getDistrict(),QRY2B.TRANS_ID,QRY2B.GL_ACCOUNT,INV_NO,it.inv_item_no);
 						}
 					}
@@ -504,7 +514,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 					def QRY2A;
 					QRY2A = sql.firstRow("select a.EXT_INV_NO,b.inv_item_no,a.CONTRACT_NO,b.VALN_NO,substr(trim(c.ENTITY_VALUE),-8) CIC_NO,d.WORK_ORDER, " +
 						"replace(e.DSTRCT_ACCT_CODE,a.DSTRCT_CODE,'') WO_ACCT_CODE,d.CIC_TYPE,h.account_code OLD_ACCT, " +
-						"h.DSTRCT_CODE,h.PROCESS_DATE||h.TRANSACTION_NO||h.USERNO||h.REC900_TYPE TRANS_ID " +
+						"h.DSTRCT_CODE,h.PROCESS_DATE||h.TRANSACTION_NO||h.USERNO||h.REC900_TYPE TRANS_ID, a.INV_NO INT_INV_NO, a.SUPPLIER_NO " +
 						"from msf260 a " +
 						"left outer join msf26a b on (a.supplier_no = b.supplier_no and a.inv_no = b.inv_no) " +
 						"left outer join msf071 c on (trim(c.ENTITY_TYPE) = 'CIV' and trim(c.ENTITY_VALUE) like trim(a.dstrct_code)||trim(a.CONTRACT_NO)||'%' and length(trim(replace(c.ENTITY_VALUE,trim(a.dstrct_code)||trim(a.CONTRACT_NO)))) = 8 and trim(ref_code) = trim(b.VALN_NO)) " +
@@ -515,6 +525,11 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 						"where a.supplier_no = '"+QRY1.SUPPLIER_NO+"' and a.EXT_INV_NO = '"+INV_NO+"' and a.DSTRCT_CODE = '"+securityToken.getDistrict()+"' and b.INV_ITEM_NO = '"+it.inv_item_no+"'");
 					if(!QRY2A.equals(null)) {
 						if(!QRY2A.TRANS_ID.equals(null)) {
+						    String strUpd = " ";
+							log.info ("QRY2A - WO");
+							strUpd = ("update msf263 set dr_account_cde = '" + QRY2A.WO_ACCT_CODE + "' where inv_no = '" + QRY2A.INT_INV_NO + "' and inv_supplier_no = '" + QRY2A.SUPPLIER_NO + "' and inv_item_no = '" + it.inv_item_no + "'");
+							log.info ("Upd MSF263: " + strUpd);
+							sql.execute(strUpd);
 							invoke_MSO904(securityToken.getDistrict(),QRY2A.TRANS_ID,QRY2A.WO_ACCT_CODE,INV_NO,it.inv_item_no);
 						}
 					}
@@ -559,7 +574,7 @@ public class UPLOAD_INV extends GenericScriptPlugin implements GenericScriptExec
 				StrErr = "FAILED TO LOAD INVOICE"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("detInvNo")
+				err.setFieldId("DET_INV_NO")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();

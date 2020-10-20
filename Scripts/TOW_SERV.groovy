@@ -50,7 +50,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 		RequestAttributes reqAtt = requestAttributes
 		
 		String PR_NO = "";
-		PR_NO = reqAtt.getAttributeStringValue("PR_NO");
+		PR_NO = reqAtt.getAttributeStringValue("prNo");
 		log.info ("PR_NO  : " + PR_NO);
 		
 		String StrSQL = ""
@@ -65,23 +65,23 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 			sql.eachRow(StrSQL, {
 				GenericScriptResult result = new GenericScriptResult();
 				if(it.STD_TXT_KEY.trim().equals("OKA")) {
-					result.addAttribute("PR_ITM_NO", right(it.ENTITY_VALUE.trim(), 3));
-					result.addAttribute("TOW_TY", "O");
-					result.addAttribute("OKA", it.REF_CODE.trim());
+					result.addAttribute("prItmNo", right(it.ENTITY_VALUE.trim(), 3));
+					result.addAttribute("towTy", "O");
+					result.addAttribute("oka", it.REF_CODE.trim());
 				}else {
-					result.addAttribute("PR_ITM_NO", right(it.ENTITY_VALUE.trim(), 3));
-					result.addAttribute("TOW_TY", "T");
-					result.addAttribute("T_CODE", it.STD_TXT_KEY.trim());
-					result.addAttribute("SUPP1", it.REF_CODE.substring(0,6).trim());
-					result.addAttribute("SUPP2", it.REF_CODE.substring(6,12).trim());
-					result.addAttribute("SUPP3", it.REF_CODE.substring(12,18).trim());
+					result.addAttribute("prItmNo", right(it.ENTITY_VALUE.trim(), 3));
+					result.addAttribute("towTy", "T");
+					result.addAttribute("tCode", it.STD_TXT_KEY.trim());
+					result.addAttribute("supp1", it.REF_CODE.substring(0,6).trim());
+					result.addAttribute("supp2", it.REF_CODE.substring(6,12).trim());
+					result.addAttribute("supp3", it.REF_CODE.substring(12,18).trim());
 				}
-				result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				results.add(result);
 			})
 		}else {
-			log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-			Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+			Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			//MaxInst = MaxInst + maxNumberOfObjects
 			StrSQL = "select row_number () over(order by a.ENTITY_VALUE) NO,a.* from MSF071 a " +
 				"where ENTITY_TYPE = 'TOW' and trim(ENTITY_VALUE) like trim('"+securityToken.getDistrict().trim() + PR_NO.trim() +"%') "
@@ -91,18 +91,18 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 				MaxInst = it.NO
 				GenericScriptResult result = new GenericScriptResult();
 				if(it.STD_TXT_KEY.trim().equals("OKA")) {
-					result.addAttribute("PR_ITM_NO", right(it.ENTITY_VALUE.trim(), 3));
-					result.addAttribute("TOW_TY", "O");
-					result.addAttribute("OKA", it.REF_CODE.trim());
+					result.addAttribute("prItmNo", right(it.ENTITY_VALUE.trim(), 3));
+					result.addAttribute("towTy", "O");
+					result.addAttribute("oka", it.REF_CODE.trim());
 				}else {
-					result.addAttribute("PR_ITM_NO", right(it.ENTITY_VALUE.trim(), 3));
-					result.addAttribute("TOW_TY", "T");
-					result.addAttribute("T_CODE", it.STD_TXT_KEY.trim());
-					result.addAttribute("SUPP1", it.REF_CODE.substring(0,6).trim());
-					result.addAttribute("SUPP2", it.REF_CODE.substring(6,12).trim());
-					result.addAttribute("SUPP3", it.REF_CODE.substring(12,18).trim());
+					result.addAttribute("prItmNo", right(it.ENTITY_VALUE.trim(), 3));
+					result.addAttribute("towTy", "T");
+					result.addAttribute("tCode", it.STD_TXT_KEY.trim());
+					result.addAttribute("supp1", it.REF_CODE.substring(0,6).trim());
+					result.addAttribute("supp2", it.REF_CODE.substring(6,12).trim());
+					result.addAttribute("supp3", it.REF_CODE.substring(12,18).trim());
 				}
-				result.addAttribute("LAST_ROW", MaxInst.toString());
+				result.addAttribute("lastRow", MaxInst.toString());
 				results.add(result);
 			})
 		}
@@ -115,9 +115,9 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 		GenericScriptResult result = new GenericScriptResult()
 		RequestAttributes reqAtt = requestAttributes[0]
 		String PR_NO = "";
-		PR_NO = reqAtt.getAttributeStringValue("PR_NO");
+		PR_NO = reqAtt.getAttributeStringValue("prNo");
 		String PR_ITEM_NO = "";
-		PR_ITEM_NO = reqAtt.getAttributeStringValue("PR_ITEM_NO");
+		PR_ITEM_NO = reqAtt.getAttributeStringValue("prItmNo");
 		if(!PR_ITEM_NO.equals(null)) {
 			PR_ITEM_NO = String.format("%03d",(Integer.parseInt(PR_ITEM_NO)));
 		}
@@ -130,17 +130,17 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 		String INP_TOW_SUPP2 = "";
 		String INP_TOW_SUPP3 = "";
 		
-		TOW_TYPE = reqAtt.getAttributeStringValue("TOW_TYPE");
+		TOW_TYPE = reqAtt.getAttributeStringValue("towType");
 		log.info ("TOW_TYPE  : " + TOW_TYPE);
-		INP_OUT_KPC = reqAtt.getAttributeStringValue("INP_OUT_KPC");
+		INP_OUT_KPC = reqAtt.getAttributeStringValue("inpOutKpc");
 		log.info ("INP_OUT_KPC  : " + INP_OUT_KPC);
-		INP_TOW_CODE = reqAtt.getAttributeStringValue("INP_TOW_CODE");
+		INP_TOW_CODE = reqAtt.getAttributeStringValue("inpTowCode");
 		log.info ("INP_TOW_CODE  : " + INP_TOW_CODE);
-		INP_TOW_SUPP1 = reqAtt.getAttributeStringValue("INP_TOW_SUPP1");
+		INP_TOW_SUPP1 = reqAtt.getAttributeStringValue("inpTowSupp1");
 		log.info ("INP_TOW_SUPP1  : " + INP_TOW_SUPP1);
-		INP_TOW_SUPP2 = reqAtt.getAttributeStringValue("INP_TOW_SUPP2");
+		INP_TOW_SUPP2 = reqAtt.getAttributeStringValue("inpTowSupp2");
 		log.info ("INP_TOW_SUPP2  : " + INP_TOW_SUPP2);
-		INP_TOW_SUPP3 = reqAtt.getAttributeStringValue("INP_TOW_SUPP3");
+		INP_TOW_SUPP3 = reqAtt.getAttributeStringValue("inpTowSupp3");
 		log.info ("INP_TOW_SUPP3  : " + INP_TOW_SUPP3);
 		
 		if(TOW_TYPE.equals(null)) {
@@ -193,7 +193,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 				StrErr = "INPUT REQUIRED!"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("INP_OUT_KPC")
+				err.setFieldId("inpOutKpc")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -203,7 +203,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 				StrErr = "INVALID LENGTH, MAX 40!"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("INP_OUT_KPC")
+				err.setFieldId("inpOutKpc")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -214,7 +214,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 				StrErr = "INPUT REQUIRED!"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("INP_TOW_CODE")
+				err.setFieldId("inpTowCode")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -227,7 +227,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 					StrErr = "TOW CODE DOESN'T EXIST"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("INP_TOW_CODE")
+					err.setFieldId("inpTowCode")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -238,7 +238,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 				StrErr = "INPUT REQUIRED!"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("INP_TOW_SUPP1")
+				err.setFieldId("inpTowSupp1")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -251,7 +251,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 					StrErr = "SUPPLIER DOESN'T EXIST IN TOW"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("INP_TOW_SUPP1")
+					err.setFieldId("inpTowSupp1")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -262,7 +262,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 				StrErr = "INPUT REQUIRED!"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("INP_TOW_SUPP2")
+				err.setFieldId("inpTowSupp2")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -276,7 +276,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 					StrErr = "SUPPLIER DOESN'T EXIST IN TOW"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("INP_TOW_SUPP2")
+					err.setFieldId("inpTowSupp2")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -291,7 +291,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 					StrErr = "SUPPLIER DOESN'T EXIST IN TOW"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("INP_TOW_SUPP3")
+					err.setFieldId("inpTowSupp3")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -320,7 +320,7 @@ public class TOW_SERV extends GenericScriptPlugin implements GenericScriptExecut
 			StrErr = "INVALID TOW TYPE"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("TOW_TYPE")
+			err.setFieldId("towType")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();

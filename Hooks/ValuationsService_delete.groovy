@@ -1,3 +1,4 @@
+package KPC.HOOKS
 /**
  * @EMS Mar 2019
  *
@@ -243,7 +244,6 @@ class ValuationsService_delete extends ServiceHook {
 		
 		return result
 	}
-
 	public String GetUserEmpID(String user, String district) {
 		String EMP_ID = "";
 		def QRY1;

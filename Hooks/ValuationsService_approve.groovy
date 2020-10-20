@@ -128,7 +128,7 @@ class ValuationsService_approve extends ServiceHook {
 		}
 		//Validate Remaining
 		QRY7 = sql.firstRow("select sum(VALUE_THIS_VALN) TOT_APPR_VAL from msf38b where trim(CONTRACT_NO) = trim('"+c.getContractNo().trim()+"') and VALN_STATUS = 'A'");
-		if(QRY7.TOT_APPR_VAL != null) {
+		if(!QRY7.TOT_APPR_VAL.equals(null)) {
 			def QRY8 = sql.firstRow("select CONTRACT_VAL from msf384 where trim(CONTRACT_NO) = trim('"+c.getContractNo().trim()+"')");
 			if(!QRY8.equals(null)) {
 				if(!QRY8.CONTRACT_VAL.equals(null)) {
@@ -254,7 +254,7 @@ class ValuationsService_approve extends ServiceHook {
 				BigDecimal EST_COST = 0;
 				//def QRY7 = sql.firstRow("select * from msf071 where ENTITY_TYPE = 'CIV' and ENTITY_VALUE like '"+tools.commarea.District.trim()+d.getContractNo()+"%' and REF_NO = '001' and SEQ_NUM = '001' and trim(REF_CODE) = trim('"+d.getValuationNo().trim()+"')");
 				//	log.info ("FIND VALN_NO  : " + QRY7);
-				if(GLBLCALC_CIC_NO != null && GLBLCALC_CIC_NO != "") {
+				if(!GLBLCALC_CIC_NO.equals(null) && !GLBLCALC_CIC_NO.equals("")) {
 					//String CALC_CIC_NO = QRY7.ENTITY_VALUE.toString().replace(tools.commarea.District.trim(), "");
 					String CALC_CIC_NO = GLBLCALC_CIC_NO.trim();
 					CALC_CIC_NO = CALC_CIC_NO.replace(d.getContractNo().trim(), "");

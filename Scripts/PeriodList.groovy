@@ -42,7 +42,7 @@ public class PeriodList extends GenericScriptPlugin implements GenericScriptExec
 	   Integer maxNumberOfObjects, RestartAttributes restartAttributes) throws FatalException {
 	   log.info("Exec for coll PeriodList : " + version )
 	   RequestAttributes reqAtt = requestAttributes
-	   String strSearch = reqAtt.getAttributeStringValue("parAtt");
+	   String strSearch = reqAtt.getAttributeStringValue("parStartPeriod");
 	   def results = new GenericScriptResults();
 	   
 	   String StrSQL = ""
@@ -61,12 +61,12 @@ public class PeriodList extends GenericScriptPlugin implements GenericScriptExec
 				   GenericScriptResult result = new GenericScriptResult()
 				   result.addAttribute("resCode", it.period);
 				   result.addAttribute("resDesc", "");
-				   result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				   result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				   results.add(result);
 			   })
 		   }else {
-			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			   //MaxInst = MaxInst + maxNumberOfObjects
 			   StrSQL = "select row_number () over(order by period) NO,period from (with t as (select date '2004-01-01' start_date,date '2200-01-01' end_date from dual) " +
 							"select  to_char(add_months(trunc(start_date,'mm'),level - 1),'yyyy') || to_char(add_months(trunc(start_date,'mm'),level - 1),'mm') period " +
@@ -79,7 +79,7 @@ public class PeriodList extends GenericScriptPlugin implements GenericScriptExec
 				   MaxInst = it.NO
 				   result.addAttribute("resCode", it.period);
 				   result.addAttribute("resDesc", "");
-				   result.addAttribute("LAST_ROW", MaxInst.toString());
+				   result.addAttribute("lastRow", MaxInst.toString());
 				   results.add(result);
 			   })
 		   }
@@ -99,12 +99,12 @@ public class PeriodList extends GenericScriptPlugin implements GenericScriptExec
 				   GenericScriptResult result = new GenericScriptResult();
 				   result.addAttribute("resCode", it.period);
 				   result.addAttribute("resDesc", "");
-				   result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				   result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				   results.add(result);
 			   })
 		   }else {
-			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			   //MaxInst = MaxInst + maxNumberOfObjects
 			   StrSQL = "select row_number () over(order by period) NO,period from (with t as (select date '2004-01-01' start_date,date '2200-01-01' end_date from dual) " +
 							"select  to_char(add_months(trunc(start_date,'mm'),level - 1),'yyyy') || to_char(add_months(trunc(start_date,'mm'),level - 1),'mm') period " +
@@ -118,7 +118,7 @@ public class PeriodList extends GenericScriptPlugin implements GenericScriptExec
 				   MaxInst = it.NO
 				   result.addAttribute("resCode", it.period);
 				   result.addAttribute("resDesc", "");
-				   result.addAttribute("LAST_ROW", MaxInst.toString());
+				   result.addAttribute("lastRow", MaxInst.toString());
 				   results.add(result);
 			   })
 		   }

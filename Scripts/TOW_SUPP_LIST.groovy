@@ -42,8 +42,8 @@ public class TOW_SUPP_LIST extends GenericScriptPlugin implements GenericScriptE
 	   Integer maxNumberOfObjects, RestartAttributes restartAttributes) throws FatalException {
 	   log.info("Exec for coll TOW_SUPP_LIST : " + version )
 	   RequestAttributes reqAtt = requestAttributes
-	   String strSearch = reqAtt.getAttributeStringValue("PARAM");
-	   String strCon = reqAtt.getAttributeStringValue("PAR_TOW_CODE");
+	   String strSearch = reqAtt.getAttributeStringValue("param");
+	   String strCon = reqAtt.getAttributeStringValue("parTowCode");
 	   def results = new GenericScriptResults();
 	   String QryCon = "";
 	   if (strCon.equals(null)) {
@@ -63,14 +63,14 @@ public class TOW_SUPP_LIST extends GenericScriptPlugin implements GenericScriptE
 			   log.info ("StrSQL : " + StrSQL);
 			   sql.eachRow(StrSQL, {
 				   GenericScriptResult result = new GenericScriptResult()
-				   result.addAttribute("RES_CODE", it.TABLE_CODE);
-				   result.addAttribute("RES_DESC", it.TABLE_DESC);
-				   result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				   result.addAttribute("resCode", it.TABLE_CODE);
+				   result.addAttribute("resDesc", it.TABLE_DESC);
+				   result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				   results.add(result);
 			   })
 		   }else {
-			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			   //MaxInst = MaxInst + maxNumberOfObjects
 			   StrSQL = "SELECT row_number () over(order by TABLE_CODE) NO,substr(TABLE_CODE,6,6) TABLE_CODE,TABLE_DESC FROM msf010 " +
 						   "where TABLE_TYPE= 'TOS' " +QryCon+
@@ -79,9 +79,9 @@ public class TOW_SUPP_LIST extends GenericScriptPlugin implements GenericScriptE
 			   sql.eachRow(StrSQL, {
 				   GenericScriptResult result = new GenericScriptResult();
 				   MaxInst = it.NO
-				   result.addAttribute("RES_CODE", it.TABLE_CODE);
-				   result.addAttribute("RES_DESC", it.TABLE_DESC);
-				   result.addAttribute("LAST_ROW", MaxInst.toString());
+				   result.addAttribute("resCode", it.TABLE_CODE);
+				   result.addAttribute("resDesc", it.TABLE_DESC);
+				   result.addAttribute("lastRow", MaxInst.toString());
 				   results.add(result);
 			   })
 		   }
@@ -96,14 +96,14 @@ public class TOW_SUPP_LIST extends GenericScriptPlugin implements GenericScriptE
 			   log.info ("StrSQL : " + StrSQL);
 			   sql.eachRow(StrSQL, {
 				   GenericScriptResult result = new GenericScriptResult();
-				   result.addAttribute("RES_CODE", it.TABLE_CODE);
-				   result.addAttribute("RES_DESC", it.TABLE_DESC);
-				   result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				   result.addAttribute("resCode", it.TABLE_CODE);
+				   result.addAttribute("resDesc", it.TABLE_DESC);
+				   result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				   results.add(result);
 			   })
 		   }else {
-			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			   //MaxInst = MaxInst + maxNumberOfObjects
 			   StrSQL = "SELECT row_number () over(order by TABLE_CODE) NO,substr(TABLE_CODE,6,6) TABLE_CODE,TABLE_DESC FROM msf010 " +
 						   "where TABLE_TYPE= 'TOS' and ((upper(TABLE_CODE) like '%'||upper('"+strSearch+"')||'%') or (upper(TABLE_DESC) like '%'||upper('"+strSearch+"')||'%')) " +QryCon+
@@ -112,9 +112,9 @@ public class TOW_SUPP_LIST extends GenericScriptPlugin implements GenericScriptE
 			   sql.eachRow(StrSQL, {
 				   GenericScriptResult result = new GenericScriptResult();
 				   MaxInst = it.NO
-				   result.addAttribute("RES_CODE", it.TABLE_CODE);
-				   result.addAttribute("RES_DESC", it.TABLE_DESC);
-				   result.addAttribute("LAST_ROW", MaxInst.toString());
+				   result.addAttribute("resCode", it.TABLE_CODE);
+				   result.addAttribute("resDesc", it.TABLE_DESC);
+				   result.addAttribute("lastRow", MaxInst.toString());
 				   results.add(result);
 			   })
 		   }

@@ -106,8 +106,7 @@ class ContractItemService_fetchPortMile extends ServiceHook{
 				ATT[2].setName("taxText");
 				ATT[2].setValue("");
 			}
-			c.setCustomAttributes(ATT)
-			c.set
+			c.setCustomAttributes(ATT);
 		}
 		return result
 	}

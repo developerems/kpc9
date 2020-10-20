@@ -42,7 +42,7 @@ public class SubAssetList extends GenericScriptPlugin implements GenericScriptEx
 	   Integer maxNumberOfObjects, RestartAttributes restartAttributes) throws FatalException {
 	   log.info("Exec for coll SubAssetList : " + version )
 	   RequestAttributes reqAtt = requestAttributes
-	   String strSearch = reqAtt.getAttributeStringValue("parAtt");
+	   String strSearch = reqAtt.getAttributeStringValue("parSubAssetNo");
 	   String strAssetNo = reqAtt.getAttributeStringValue("parAssetNo");
 	   def results = new GenericScriptResults();
 	   
@@ -67,12 +67,12 @@ public class SubAssetList extends GenericScriptPlugin implements GenericScriptEx
 				   GenericScriptResult result = new GenericScriptResult()
 				   result.addAttribute("resCode", it.SUB_ASSET_NO);
 				   result.addAttribute("resDesc", "");
-				   result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				   result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				   results.add(result);
 			   })
 		   }else {
-			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			   //MaxInst = MaxInst + maxNumberOfObjects
 			   StrSQL = "select row_number () over(order by a.SUB_ASSET_NO) NO,a.* from (" +
 			               "SELECT distinct a.SUB_ASSET_NO From msf685 a " +
@@ -84,7 +84,7 @@ public class SubAssetList extends GenericScriptPlugin implements GenericScriptEx
 				   MaxInst = it.NO
 				   result.addAttribute("resCode", it.SUB_ASSET_NO);
 				   result.addAttribute("resDesc", "");
-				   result.addAttribute("LAST_ROW", MaxInst.toString());
+				   result.addAttribute("lastRow", MaxInst.toString());
 				   results.add(result);
 			   })
 		   }
@@ -102,12 +102,12 @@ public class SubAssetList extends GenericScriptPlugin implements GenericScriptEx
 				   GenericScriptResult result = new GenericScriptResult();
 				   result.addAttribute("resCode", it.SUB_ASSET_NO);
 				   result.addAttribute("resDesc", "");
-				   result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				   result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				   results.add(result);
 			   })
 		   }else {
-			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("LAST_ROW") );
-			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			   log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
+			   Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			   //MaxInst = MaxInst + maxNumberOfObjects
 			   StrSQL = "select row_number () over(order by a.SUB_ASSET_NO) NO,a.* from (" +
 			               "SELECT distinct a.SUB_ASSET_NO From msf685 a " +
@@ -119,7 +119,7 @@ public class SubAssetList extends GenericScriptPlugin implements GenericScriptEx
 				   MaxInst = it.NO
 				   result.addAttribute("resCode", it.SUB_ASSET_NO);
 				   result.addAttribute("resDesc", "");
-				   result.addAttribute("LAST_ROW", MaxInst.toString());
+				   result.addAttribute("lastRow", MaxInst.toString());
 				   results.add(result);
 			   })
 		   }
