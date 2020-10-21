@@ -34,7 +34,7 @@ class GenericScriptService_create extends ServiceHook{
 		custAttribs.each{Attribute customAttribute ->
 			log.info ("attrName : " + customAttribute.getName());
 			log.info ("attrValue : " + customAttribute.getValue());
-						if (customAttribute.getName() == "sGp") {
+			if (customAttribute.getName() == "sGp") {
 				readAction = true;
 				scrptName = "ell38sDetail";
 			}
@@ -42,6 +42,11 @@ class GenericScriptService_create extends ServiceHook{
 				readAction = true;
 				scrptName = "ELL38C_DETAIL";
 			}
+			
+			if (customAttribute.getName() == "cntNo") {
+				scrptName = "ELL38C_DETAIL";
+			}
+			
 			if (customAttribute.getName() == "scrName" && customAttribute.getValue() == "ell38sDetail") {
 				readAction = true;
 				scrptName = "ell38sDetail";

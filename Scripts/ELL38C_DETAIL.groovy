@@ -1,8 +1,6 @@
 /**
  * @EMS Jan 2019
  *
- * 20200810 - a9rj2193 - Ratna Juanita - Case #003340
- *            Add CIC-STATUS 'U' to compute Remaining Plan. 
  * 20190101 - a9ra5213 - Ricky Afriano - KPC UPGRADE Ellipse 8
  *            Initial Coding - Find Detail for CIC in ELL38C Detail Screen 
  **/
@@ -38,7 +36,7 @@ import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceDeleteRe
 
 
 public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptExecute, GenericScriptUpdate, GenericScriptCreate, GenericScriptDelete{
-	String version = "2";
+	String version = "1";
 	InitialContext initial = new InitialContext();
 	Object CAISource = initial.lookup("java:jboss/datasources/ApplicationDatasource");
 	def sql = new Sql(CAISource);
@@ -62,33 +60,33 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		RequestAttributes reqAtt = requestAttributes[0];
 
 		String CNT_NO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("DIA_CNT_NO");
+		if (!reqAtt.getAttributeStringValue("diaCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("diaCntNo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("CNT_NO");
+		else if (reqAtt.getAttributeStringValue("parGrdCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("cntNo");
 		}else {
-			CNT_NO = reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO");
+			CNT_NO = reqAtt.getAttributeStringValue("parGrdCntNo");
 		}
 
 		String CIC_NO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_CIC_NO").equals(null)) {
-			CIC_NO = reqAtt.getAttributeStringValue("DIA_CIC_NO");
+		if (!reqAtt.getAttributeStringValue("diaCicNo").equals(null)) {
+			CIC_NO = reqAtt.getAttributeStringValue("diaCicNo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO").equals(null)) {
-			CIC_NO = reqAtt.getAttributeStringValue("CIC_NO");
+		else if (reqAtt.getAttributeStringValue("parGrdCicNo").equals(null)) {
+			CIC_NO = reqAtt.getAttributeStringValue("cicNo");
 		}else {
-			CIC_NO = reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO");
+			CIC_NO = reqAtt.getAttributeStringValue("parGrdCicNo");
 		}
 
 		String WO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_PAR_WO").equals(null)) {
-			WO = reqAtt.getAttributeStringValue("DIA_PAR_WO");
+		if (!reqAtt.getAttributeStringValue("diaParWo").equals(null)) {
+			WO = reqAtt.getAttributeStringValue("diaParWo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_WO_NO").equals(null)) {
-			WO = reqAtt.getAttributeStringValue("WO");
+		else if (reqAtt.getAttributeStringValue("parGrdWoNo").equals(null)) {
+			WO = reqAtt.getAttributeStringValue("wo");
 		}else {
-			WO = reqAtt.getAttributeStringValue("PAR_GRD_WO_NO");
+			WO = reqAtt.getAttributeStringValue("parGrdWoNo");
 		}
 		log.info("CNT_NO : " + CNT_NO );
 		log.info("CIC_NO : " + CIC_NO );
@@ -96,11 +94,10 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		DecimalFormat df = new DecimalFormat("#,##0.00;-#,##0.00");
 		def QRY1;
 
-		/* Case 003340 -- add 'U' in "select contract_no, sum(case when CIC_STATUS in ('1', 'U')..." */
 		QRY1 = sql.firstRow("select a.*,a.CONTRACT_VAL - b.INV_VAL REM_ACT,(a.CONTRACT_VAL - b.INV_VAL) - EST_VAL REM_PLN,trim(d.table_desc) CCOC_DESC " +
 				"from msf384 a " +
 				"left outer join ( " +
-				"select CONTRACT_NO,sum(case when CIC_STATUS in ('1', 'U') then EST_COST else 0 end) EST_VAL, " +
+				"select CONTRACT_NO,sum(case when CIC_STATUS = '1' then EST_COST else 0 end) EST_VAL, " +
 				"sum(case when CIC_STATUS in ('2','4') then ACT_COST else 0 end) INV_VAL " +
 				"from ACA.KPF38F " +
 				"where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) " +
@@ -110,12 +107,10 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				"where a.DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(a.CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) ");
 
 		if(!QRY1.equals(null)) {
-			result.addAttribute("COC", QRY1.CCOC_DESC);
-			result.addAttribute("COC_CODE", QRY1.COND_OF_CNTRCT);
-			result.addAttribute("REM_ACT", QRY1.REM_ACT);
-			result.addAttribute("REM_PLAN", QRY1.REM_PLN);
-			log.info("CNT_NO : " + CNT_NO );
-			log.info("REM Plan : " + QRY1.REM_PLN );
+			result.addAttribute("coc", QRY1.CCOC_DESC);
+			result.addAttribute("cocCode", QRY1.COND_OF_CNTRCT);
+			result.addAttribute("remAct", QRY1.REM_ACT);
+			result.addAttribute("remPlan", QRY1.REM_PLN);
 			String qryCIC = "";
 			String qryWO = "";
 			if(CIC_NO.equals(null) || CIC_NO.equals("")) {
@@ -140,55 +135,55 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			 }
 			 */
 			String MODE = "";
-			result.addAttribute("MODE", " ");
+			result.addAttribute("mode", " ");
 			QRY1 = sql.firstRow("select a.*,case when b.EQUIP_NO is null then ' ' else b.EQUIP_NO end EQP_NO,case when b.DSTRCT_ACCT_CODE is null then ' ' else replace(b.DSTRCT_ACCT_CODE,a.dstrct_code) end ACCT_CODE from ACA.KPF38F a " +
 					"left outer join msf620 b on (a.dstrct_code = b.dstrct_code and a.work_order = b.work_order) " +
 					"where a.DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(a.CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) "+qryCIC+"");
 			log.info ("FIND CIC  : " + QRY1);
 			if(!QRY1.equals(null)) {
-				result.addAttribute("CIC_INV", QRY1.CIC_INVOICE);
-				result.addAttribute("WO", QRY1.WORK_ORDER);
-				result.addAttribute("DST", QRY1.DSTRCT_CODE);
-				result.addAttribute("EST_CST", QRY1.EST_COST);
-				result.addAttribute("ACT_CST", QRY1.ACT_COST);
-				result.addAttribute("ORIGINATOR", QRY1.ORIGINATOR_CIC);
-				result.addAttribute("EST_DATE", QRY1.EST_DATE);
-				result.addAttribute("ACCEPT_BY", QRY1.COMPL_BY);
-				result.addAttribute("ACC_DATE", QRY1.COMPL_DATE);
-				result.addAttribute("EQP_NO", QRY1.EQP_NO);
-				result.addAttribute("ACCT_CODE", QRY1.ACCT_CODE);
+				result.addAttribute("cicInv", QRY1.CIC_INVOICE);
+				result.addAttribute("wo", QRY1.WORK_ORDER);
+				result.addAttribute("dst", QRY1.DSTRCT_CODE);
+				result.addAttribute("estCst", QRY1.EST_COST);
+				result.addAttribute("actCst", QRY1.ACT_COST);
+				result.addAttribute("originator", QRY1.ORIGINATOR_CIC);
+				result.addAttribute("estDate", QRY1.EST_DATE);
+				result.addAttribute("acceptBy", QRY1.COMPL_BY);
+				result.addAttribute("accDate", QRY1.COMPL_DATE);
+				result.addAttribute("eqpNo", QRY1.EQP_NO);
+				result.addAttribute("acctCode", QRY1.ACCT_CODE);
 				if (QRY1.CUM_COST == 0) {
-					result.addAttribute("TOT_VAL", QRY1.ACT_COST);
+					result.addAttribute("totVal", QRY1.ACT_COST);
 				}else {
-					result.addAttribute("TOT_VAL", QRY1.CUM_COST);
+					result.addAttribute("totVal", QRY1.CUM_COST);
 				}
 
 				if (QRY1.CIC_STATUS.trim().equals("1")) {
-					result.addAttribute("CIC_STAT", "Estimated");
+					result.addAttribute("cicStat", "Estimated");
 				}else if (QRY1.CIC_STATUS.trim().equals("2")) {
-					result.addAttribute("CIC_STAT", "Accepted");
+					result.addAttribute("cicStat", "Accepted");
 				}else if (QRY1.CIC_STATUS.trim().equals("3")) {
-					result.addAttribute("CIC_STAT", "Canceled");
+					result.addAttribute("cicStat", "Canceled");
 				}else if (QRY1.CIC_STATUS.trim().equals("4")) {
-					result.addAttribute("CIC_STAT", "Invoiced");
+					result.addAttribute("cicStat", "Invoiced");
 				}else if (QRY1.CIC_STATUS.trim().equals("U")) {
-					result.addAttribute("CIC_STAT", "Awaiting Approval");
+					result.addAttribute("cicStat", "Awaiting Approval");
 				}else if (QRY1.CIC_STATUS.trim().equals("R")) {
-					result.addAttribute("CIC_STAT", "Rejected");
+					result.addAttribute("cicStat", "Rejected");
 				}
 				result.addAttribute("MODE", QRY1.CIC_TYPE);
-				result.addAttribute("CIC_DESC", QRY1.CIC_DESC.trim());
+				result.addAttribute("cicDesc", QRY1.CIC_DESC.trim());
 				def QRY7 = sql.firstRow("select * from msf071 " +
 						"where ENTITY_TYPE = 'CIV' and trim(ENTITY_VALUE) = trim('${securityToken.getDistrict()}${QRY1.CONTRACT_NO.trim()}${QRY1.CIC_NO.trim()}') and REF_NO = '001' and SEQ_NUM = '001'");
 				log.info ("FIND VALN_NO  : " + QRY7);
 				if(!QRY7.equals(null)) {
-					result.addAttribute("CIC_VALN_NO", QRY7.REF_CODE.trim());
+					result.addAttribute("cicValnNo", QRY7.REF_CODE.trim());
 				}
 			}
 		}
-		result.addAttribute("CNT_NO", QRY1.CONTRACT_NO);
-		result.addAttribute("CIC_NO", QRY1.CIC_NO);
-		result.addAttribute("WO", QRY1.WORK_ORDER);
+		result.addAttribute("cntNo", QRY1.CONTRACT_NO);
+		result.addAttribute("cicNo", QRY1.CIC_NO);
+		result.addAttribute("wo", QRY1.WORK_ORDER);
 
 		results.add(result);
 		return results;
@@ -201,23 +196,23 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		RequestAttributes reqAtt = requestAttributes[0];
 
 		String CNT_NO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("DIA_CNT_NO");
+		if (!reqAtt.getAttributeStringValue("diaCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("diaCntNo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("CNT_NO");
+		else if (reqAtt.getAttributeStringValue("parGrdCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("cntNo");
 		}else {
-			CNT_NO = reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO");
+			CNT_NO = reqAtt.getAttributeStringValue("parGrdCntNo");
 		}
 
 		String WO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_PAR_WO").equals(null)) {
-			WO = reqAtt.getAttributeStringValue("DIA_PAR_WO");
+		if (!reqAtt.getAttributeStringValue("diaParWo").equals(null)) {
+			WO = reqAtt.getAttributeStringValue("diaParWo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_WO_NO").equals(null)) {
-			WO = reqAtt.getAttributeStringValue("WO");
+		else if (reqAtt.getAttributeStringValue("parGrdWoNo").equals(null)) {
+			WO = reqAtt.getAttributeStringValue("wo");
 		}else {
-			WO = reqAtt.getAttributeStringValue("PAR_GRD_WO_NO");
+			WO = reqAtt.getAttributeStringValue("parGrdWoNo");
 		}
 
 		log.info("CNT_NO : " + CNT_NO );
@@ -248,7 +243,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				StrErr = "YOU DO NOT HAVE AUTHORITY ACLK"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("CRE_CNT_NO")
+				//err.setFieldId("creCntNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -258,7 +253,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				StrErr = "YOU DO NOT HAVE AUTHORITY CPAU"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("CRE_CNT_NO")
+				//err.setFieldId("creCntNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -268,7 +263,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				StrErr = "YOU DO NOT HAVE AUTHORITY VAPP"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("CRE_CNT_NO")
+				//err.setFieldId("creCntNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -278,7 +273,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "USER SECURITY NOT FOUND"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			//err.setFieldId("CRE_CNT_NO")
+			//err.setFieldId("creCntNo")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -321,7 +316,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "INVALID CONTRACT NUMBER / DOESN'T EXIST"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("CRE_CNT_NO")
+			err.setFieldId("creCntNo")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -332,7 +327,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				StrErr = "CONTRACT STATUS FINAL COMPLETION"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("CRE_CNT_NO")
+				err.setFieldId("creCntNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -342,7 +337,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				StrErr = "CONTARCT STATUS ON HOLD"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("CRE_CNT_NO")
+				err.setFieldId("creCntNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -360,7 +355,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 					StrErr = "MAXIMUM VALUATION NUMBER REACH"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("CRE_CNT_NO")
+					err.setFieldId("creCntNo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -378,7 +373,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				StrErr = "INVALID WO NUMBER / DOESN'T EXIST"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("WO")
+				err.setFieldId("wo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -390,7 +385,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				 StrErr = "CONTRACT AND WORK ORDER NOT MATCH"
 				 SetErrMes();
 				 com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				 err.setFieldId("WO")
+				 err.setFieldId("wo")
 				 result.addError(err)
 				 results.add(result)
 				 RollErrMes();
@@ -401,7 +396,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				 StrErr = "WORK ORDER STATUS UNAUTHORIZED OR CLOSED"
 				 SetErrMes();
 				 com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				 err.setFieldId("WO")
+				 err.setFieldId("wo")
 				 result.addError(err)
 				 results.add(result)
 				 RollErrMes();
@@ -412,7 +407,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 					StrErr = "WORK ORDER COSTS HAS BEEN FINALIZED"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("WO")
+					err.setFieldId("wo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -425,7 +420,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "WO NUMBER REQUIRED"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("WO")
+			err.setFieldId("wo")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -448,7 +443,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		}
 
 		//Validate CIC DESC
-		String CIC_DESC = reqAtt.getAttributeStringValue("CIC_DESC");
+		String CIC_DESC = reqAtt.getAttributeStringValue("cicDesc");
 
 		if (CIC_DESC.equals(null) || CIC_DESC.equals("")){
 			CIC_DESC = " "
@@ -461,7 +456,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "INVALID LENGTH CIC DESCRIPTION"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("CIC_DESC")
+			err.setFieldId("cicDesc")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -560,7 +555,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 					StrErr = StrErr.replace("VALUATION", "CIC")
 					//SetErrMes();
 					//com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					//err.setFieldId("CIC_NO")
+					//err.setFieldId("cicNo")
 					//result.addError(err)
 					result.addError(new UnlocalisedError(StrErr))
 					results.add(result)
@@ -580,9 +575,9 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 
 
 
-		result.addAttribute("CNT_NO", CNT_NO);
-		result.addAttribute("CIC_NO", NewCIC);
-		result.addAttribute("WO", WO);
+		result.addAttribute("cntNo", CNT_NO);
+		result.addAttribute("cicNo", NewCIC);
+		result.addAttribute("wo", WO);
 
 		results.add(result);
 		return results;
@@ -595,33 +590,33 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		RequestAttributes reqAtt = requestAttributes[0];
 
 		String CNT_NO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("DIA_CNT_NO");
+		if (!reqAtt.getAttributeStringValue("diaCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("diaCntNo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("CNT_NO");
+		else if (reqAtt.getAttributeStringValue("parGrdCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("cntNo");
 		}else {
-			CNT_NO = reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO");
+			CNT_NO = reqAtt.getAttributeStringValue("parGrdCntNo");
 		}
 
 		String CIC_NO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_CIC_NO").equals(null)) {
-			CIC_NO = reqAtt.getAttributeStringValue("DIA_CIC_NO");
+		if (!reqAtt.getAttributeStringValue("diaCicNo").equals(null)) {
+			CIC_NO = reqAtt.getAttributeStringValue("diaCicNo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO").equals(null)) {
-			CIC_NO = reqAtt.getAttributeStringValue("CIC_NO");
+		else if (reqAtt.getAttributeStringValue("parGrdCicNo").equals(null)) {
+			CIC_NO = reqAtt.getAttributeStringValue("cicNo");
 		}else {
-			CIC_NO = reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO");
+			CIC_NO = reqAtt.getAttributeStringValue("parGrdCicNo");
 		}
 
 		String WO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_PAR_WO").equals(null)) {
-			WO = reqAtt.getAttributeStringValue("DIA_PAR_WO");
+		if (!reqAtt.getAttributeStringValue("diaParWo").equals(null)) {
+			WO = reqAtt.getAttributeStringValue("diaParWo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_WO_NO").equals(null)) {
-			WO = reqAtt.getAttributeStringValue("WO");
+		else if (reqAtt.getAttributeStringValue("parGrdWoNo").equals(null)) {
+			WO = reqAtt.getAttributeStringValue("wo");
 		}else {
-			WO = reqAtt.getAttributeStringValue("PAR_GRD_WO_NO");
+			WO = reqAtt.getAttributeStringValue("parGrdWoNo");
 		}
 
 		log.info("CNT_NO : " + CNT_NO );
@@ -634,7 +629,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "INVALID CONTRACT NUMBER / DOESN'T EXIST"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("CRE_CNT_NO")
+			err.setFieldId("creCntNo")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -651,7 +646,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 					StrErr = "INVALID WO NUMBER / DOESN'T EXIST"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("WO")
+					err.setFieldId("wo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -663,7 +658,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 					 StrErr = "CONTRACT AND WORK ORDER NOT MATCH"
 					 SetErrMes();
 					 com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					 err.setFieldId("WO")
+					 err.setFieldId("wo")
 					 result.addError(err)
 					 results.add(result)
 					 RollErrMes();
@@ -674,7 +669,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 					 StrErr = "WORK ORDER STATUS UNAUTHORIZED OR CLOSED"
 					 SetErrMes();
 					 com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					 err.setFieldId("WO")
+					 err.setFieldId("wo")
 					 result.addError(err)
 					 results.add(result)
 					 RollErrMes();
@@ -685,7 +680,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 						StrErr = "WORK ORDER COSTS HAS BEEN FINALIZED"
 						SetErrMes();
 						com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-						err.setFieldId("WO")
+						err.setFieldId("wo")
 						result.addError(err)
 						results.add(result)
 						RollErrMes();
@@ -699,7 +694,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "WO NUMBER REQUIRED"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("WO")
+			err.setFieldId("wo")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -715,7 +710,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "INVALID CIC NUMBER / DOESN'T EXIST"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("CIC_NO")
+			err.setFieldId("cicNo")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -726,7 +721,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				StrErr = "CIC STATUS MUST IN ESTIMATE"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("CIC_NO")
+				//err.setFieldId("cicNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -736,7 +731,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		}
 
 		//Validate CIC DESC
-		String CIC_DESC = reqAtt.getAttributeStringValue("CIC_DESC");
+		String CIC_DESC = reqAtt.getAttributeStringValue("cicDesc");
 		if (CIC_DESC.equals(null) || CIC_DESC.equals("")){
 			CIC_DESC = " "
 		}else {
@@ -747,7 +742,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "INVALID LENGTH CIC DESCRIPTION"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("CIC_DESC")
+			err.setFieldId("cicDesc")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -781,23 +776,23 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		RequestAttributes reqAtt = requestAttributes[0];
 
 		String CNT_NO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("DIA_CNT_NO");
+		if (!reqAtt.getAttributeStringValue("diaCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("diaCntNo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("CNT_NO");
+		else if (reqAtt.getAttributeStringValue("parGrdCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("cntNo");
 		}else {
-			CNT_NO = reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO");
+			CNT_NO = reqAtt.getAttributeStringValue("parGrdCntNo");
 		}
 
 		String CIC_NO = "";
-		if (!reqAtt.getAttributeStringValue("DIA_CIC_NO").equals(null)) {
-			CIC_NO = reqAtt.getAttributeStringValue("DIA_CIC_NO");
+		if (!reqAtt.getAttributeStringValue("diaCicNo").equals(null)) {
+			CIC_NO = reqAtt.getAttributeStringValue("diaCicNo");
 		}
-		else if (reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO").equals(null)) {
-			CIC_NO = reqAtt.getAttributeStringValue("CIC_NO");
+		else if (reqAtt.getAttributeStringValue("parGrdCicNo").equals(null)) {
+			CIC_NO = reqAtt.getAttributeStringValue("cicNo");
 		}else {
-			CIC_NO = reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO");
+			CIC_NO = reqAtt.getAttributeStringValue("parGrdCicNo");
 		}
 
 		//Validate Contract No
@@ -808,7 +803,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "INVALID CONTRACT NUMBER / DOESN'T EXIST"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("CNT_NO")
+			err.setFieldId("cntNo")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -823,7 +818,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			StrErr = "INVALID CIC NUMBER / DOESN'T EXIST"
 			SetErrMes();
 			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-			err.setFieldId("CIC_NO")
+			err.setFieldId("cicNo")
 			result.addError(err)
 			results.add(result)
 			RollErrMes();
@@ -834,7 +829,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				StrErr = "CIC STATUS MUST IN ESTIMATE / REJECT"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("CIC_NO")
+				//err.setFieldId("cicNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -855,7 +850,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 							StrErr = StrErr.replace("VALUATION", "CIC")
 							SetErrMes();
 							com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-							//err.setFieldId("CIC_NO")
+							//err.setFieldId("cicNo")
 							result.addError(err)
 							results.add(result)
 							RollErrMes();
