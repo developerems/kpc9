@@ -47,7 +47,14 @@ class GenericScriptService_execute extends ServiceHook{
 				readAction = true;
 				scrptName = "ELL38C_DETAIL";
 			}
+<<<<<<< Updated upstream
 
+=======
+			if (customAttribute.getName() == "cntNo") {
+				readAction = true;
+				scrptName = "ELL38C_DETAIL";
+			}
+>>>>>>> Stashed changes
 			if (customAttribute.getName() == "grdInvNo") {
 				readAction = true;
 				scrptName = "ELL38I_DETAIL";
