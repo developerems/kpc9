@@ -6,8 +6,6 @@
  * 20190101 - a9ra5213 - Ricky Afriano - KPC UPGRADE Ellipse 8
  *            Initial Coding - Find Detail for CIC in ELL38C Detail Screen 
  **/
-package KPC
-
 import javax.naming.InitialContext
 
 import com.mincom.ellipse.app.security.SecurityToken
@@ -181,7 +179,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				result.addAttribute("MODE", QRY1.CIC_TYPE);
 				result.addAttribute("CIC_DESC", QRY1.CIC_DESC.trim());
 				def QRY7 = sql.firstRow("select * from msf071 " +
-						"where ENTITY_TYPE = 'CIV' and trim(ENTITY_VALUE) = trim('"+securityToken.getDistrict()+CNT_NO.trim()+CIC_NO.trim()+"') and REF_NO = '001' and SEQ_NUM = '001'");
+						"where ENTITY_TYPE = 'CIV' and trim(ENTITY_VALUE) = trim('${securityToken.getDistrict()}${QRY1.CONTRACT_NO.trim()}${QRY1.CIC_NO.trim()}') and REF_NO = '001' and SEQ_NUM = '001'");
 				log.info ("FIND VALN_NO  : " + QRY7);
 				if(!QRY7.equals(null)) {
 					result.addAttribute("CIC_VALN_NO", QRY7.REF_CODE.trim());
