@@ -48,6 +48,7 @@ class GenericScriptService_execute extends ServiceHook{
 				scrptName = "ELL38C_DETAIL";
 			}
 
+			if (customAttribute.getName() == "cntNo") {
 			if (customAttribute.getName() == "grdInvNo") {
 				readAction = true;
 				scrptName = "ELL38I_DETAIL";
