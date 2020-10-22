@@ -87,24 +87,24 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		RequestAttributes reqAtt = requestAttributes
 
 		String CNT_NO = "";
-		if (reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("CNT_NO");
+		if (reqAtt.getAttributeStringValue("parGrdCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("cntNo");
 		}else {
-			CNT_NO = reqAtt.getAttributeStringValue("PAR_GRD_CNT_NO");
+			CNT_NO = reqAtt.getAttributeStringValue("parGrdCntNo");
 		}
 
 		String CIC_NO = "";
-		if (reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO").equals(null)) {
-			CIC_NO = reqAtt.getAttributeStringValue("CIC_NO");
+		if (reqAtt.getAttributeStringValue("parGrdCicNo").equals(null)) {
+			CIC_NO = reqAtt.getAttributeStringValue("cicNo");
 		}else {
-			CIC_NO = reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO");
+			CIC_NO = reqAtt.getAttributeStringValue("parGrdCicNo");
 		}
 
 		String WO = "";
-		if (reqAtt.getAttributeStringValue("PAR_GRD_WO_NO").equals(null)) {
-			WO = reqAtt.getAttributeStringValue("WO");
+		if (reqAtt.getAttributeStringValue("parGrdWoNo").equals(null)) {
+			WO = reqAtt.getAttributeStringValue("wo");
 		}else {
-			WO = reqAtt.getAttributeStringValue("PAR_GRD_WO_NO");
+			WO = reqAtt.getAttributeStringValue("parGrdWoNo");
 		}
 		DecimalFormat df = new DecimalFormat("#,##0.00;-#,##0.00");
 
@@ -153,31 +153,31 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 			sql.eachRow(StrSQL, {
 
 				GenericScriptResult result = new GenericScriptResult();
-				result.addAttribute("CIC_ITM_NO", it.CIC_ITEM_NO);
-				result.addAttribute("CIC_ITM_DESC", it.CIC_ITEM_DESC);
-				result.addAttribute("CIC_TYPE", it.CIC_TYPE);
-				result.addAttribute("BASE_RATE", it.CATEG_BASE_RATE);
-				result.addAttribute("BASE_UNIT", it.CATEG_BASE_UN);
-				result.addAttribute("EST_QTY", it.ESTIMATED_QTY);
-				result.addAttribute("ACT_QTY", it.ACTUAL_QTY);
+				result.addAttribute("cicItmNo", it.CIC_ITEM_NO);
+				result.addAttribute("cicItmDesc", it.CIC_ITEM_DESC);
+				result.addAttribute("cicType", it.CIC_TYPE);
+				result.addAttribute("baseRate", it.CATEG_BASE_RATE);
+				result.addAttribute("baseUnit", it.CATEG_BASE_UN);
+				result.addAttribute("estQty", it.ESTIMATED_QTY);
+				result.addAttribute("actQty", it.ACTUAL_QTY);
 				if(FOREIGN_TRANS.equals(true)) {
-					result.addAttribute("VAL", it.PROGRESS_F);
+					result.addAttribute("val", it.PROGRESS_F);
 				}else {
-					result.addAttribute("VAL", it.PROGRESS);
+					result.addAttribute("val", it.PROGRESS);
 				}
-				result.addAttribute("CIC_PORTION", it.PORTION);
-				result.addAttribute("CIC_ELEMENT", it.ELEMENT);
-				result.addAttribute("CIC_CATEGORY", it.CATEGORY);
-				result.addAttribute("LAST_ROW", maxNumberOfObjects.toString());
+				result.addAttribute("cicPortion", it.PORTION);
+				result.addAttribute("cicElement", it.ELEMENT);
+				result.addAttribute("cicCategory", it.CATEGORY);
+				result.addAttribute("lastRow", maxNumberOfObjects.toString());
 				if((CIC_STATUS.trim().equals("1") || CIC_STATUS.trim().equals("R")) && it.CIC_TYPE.trim().equals("WO")) {
-					result.addAttribute("WO_EDIT", "TRUE");
+					result.addAttribute("woEdit", "TRUE");
 				}else {
-					result.addAttribute("WO_EDIT", "FALSE");
+					result.addAttribute("woEdit", "FALSE");
 				}
 				if((CIC_STATUS.trim().equals("1") || CIC_STATUS.trim().equals("R")) && it.CIC_TYPE.trim().equals("LS")) {
-					result.addAttribute("LS_EDIT", "TRUE");
+					result.addAttribute("lsEdit", "TRUE");
 				}else {
-					result.addAttribute("LS_EDIT", "FALSE");
+					result.addAttribute("lsEdit", "FALSE");
 				}
 				BigDecimal PERCENTAGE = 0;
 				if(it.CIC_TYPE.trim().equals("LS")) {
@@ -190,14 +190,14 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 					PERCENTAGE = 0;
 				}
 				PERCENTAGE = PERCENTAGE.setScale(2,RoundingMode.HALF_UP);
-				result.addAttribute("PERCENTAGE", PERCENTAGE);
+				result.addAttribute("percentage", PERCENTAGE);
 				results.add(result);
 
 			})
 		}else {
-			//Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			//Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			//MaxInst = MaxInst + maxNumberOfObjects
-			Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("LAST_ROW"));
+			Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
 			StrSQL = "select row_number () over(order by CIC_ITEM_NO) AS NO,a.*,substr(a.CIC_ITEM_NO,1,2) PORTION,substr(a.CIC_ITEM_NO,3,2) ELEMENT,substr(a.CIC_ITEM_NO,5,2) CATEGORY from ACA.KPF38G a " +
 					"where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and upper(trim(CIC_NO)) = '"+CIC_NO+"'" +
 					"Order by CIC_ITEM_NO OFFSET "+MaxInst.toString()+" ROWS FETCH NEXT "+maxNumberOfObjects.toString()+" ROWS ONLY";
@@ -206,31 +206,31 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 			sql.eachRow(StrSQL, {
 				GenericScriptResult result = new GenericScriptResult();
 				MaxInst = it.NO
-				result.addAttribute("CIC_ITM_NO", it.CIC_ITEM_NO);
-				result.addAttribute("CIC_ITM_DESC", it.CIC_ITEM_DESC);
-				result.addAttribute("CIC_TYPE", it.CIC_TYPE);
-				result.addAttribute("BASE_RATE", it.CATEG_BASE_RATE);
-				result.addAttribute("BASE_UNIT", it.CATEG_BASE_UN);
-				result.addAttribute("EST_QTY", it.ESTIMATED_QTY);
-				result.addAttribute("ACT_QTY", it.ACTUAL_QTY);
+				result.addAttribute("cicItmNo", it.CIC_ITEM_NO);
+				result.addAttribute("cicItmDesc", it.CIC_ITEM_DESC);
+				result.addAttribute("cicType", it.CIC_TYPE);
+				result.addAttribute("baseRate", it.CATEG_BASE_RATE);
+				result.addAttribute("baseUnit", it.CATEG_BASE_UN);
+				result.addAttribute("estQty", it.ESTIMATED_QTY);
+				result.addAttribute("actQty", it.ACTUAL_QTY);
 				if(FOREIGN_TRANS.equals(true)) {
-					result.addAttribute("VAL", it.PROGRESS_F);
+					result.addAttribute("val", it.PROGRESS_F);
 				}else {
-					result.addAttribute("VAL", it.PROGRESS);
+					result.addAttribute("val", it.PROGRESS);
 				}
-				result.addAttribute("CIC_PORTION", it.PORTION);
-				result.addAttribute("CIC_ELEMENT", it.ELEMENT);
-				result.addAttribute("CIC_CATEGORY", it.CATEGORY);
-				result.addAttribute("LAST_ROW", MaxInst.toString());
+				result.addAttribute("cicPortion", it.PORTION);
+				result.addAttribute("cicElement", it.ELEMENT);
+				result.addAttribute("cicCategory", it.CATEGORY);
+				result.addAttribute("lastRow", MaxInst.toString());
 				if((CIC_STATUS.trim().equals("1") || CIC_STATUS.trim().equals("R")) && it.CIC_TYPE.trim().equals("WO")) {
-					result.addAttribute("WO_EDIT", "TRUE");
+					result.addAttribute("woEdit", "TRUE");
 				}else {
-					result.addAttribute("WO_EDIT", "FALSE");
+					result.addAttribute("woEdit", "FALSE");
 				}
 				if((CIC_STATUS.trim().equals("1") || CIC_STATUS.trim().equals("R")) && it.CIC_TYPE.trim().equals("LS")) {
-					result.addAttribute("LS_EDIT", "TRUE");
+					result.addAttribute("lsEdit", "TRUE");
 				}else {
-					result.addAttribute("LS_EDIT", "FALSE");
+					result.addAttribute("lsEdit", "FALSE");
 				}
 				BigDecimal PERCENTAGE = 0;
 				if(it.CIC_TYPE.trim().equals("LS")) {
@@ -242,7 +242,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				}else {
 					PERCENTAGE = 0;
 				}
-				result.addAttribute("PERCENTAGE", PERCENTAGE);
+				result.addAttribute("percentage", PERCENTAGE);
 				results.add(result);
 			})
 		}
@@ -266,24 +266,24 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		RequestAttributes reqAtt = requestAttributes[0]
 		DST = securityToken.getDistrict();
 		String CNT_NO = "";
-		if (reqAtt.getAttributeStringValue("PAR_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("CNT_NO");
+		if (reqAtt.getAttributeStringValue("parCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("cntNo");
 		}else {
-			CNT_NO = reqAtt.getAttributeStringValue("PAR_CNT_NO");
+			CNT_NO = reqAtt.getAttributeStringValue("parCntNo");
 		}
 
 		String WO = "";
-		if (reqAtt.getAttributeStringValue("PAR_WO").equals(null)) {
-			WO = reqAtt.getAttributeStringValue("WO");
+		if (reqAtt.getAttributeStringValue("parWo").equals(null)) {
+			WO = reqAtt.getAttributeStringValue("wo");
 		}else {
-			WO = reqAtt.getAttributeStringValue("PAR_WO");
+			WO = reqAtt.getAttributeStringValue("parWo");
 		}
 		WO_NO_GLBL = "";
 		String CIC_NO = "";
-		if (reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO").equals(null)) {
-			CIC_NO = reqAtt.getAttributeStringValue("CIC_NO");
+		if (reqAtt.getAttributeStringValue("parGrdCicNo").equals(null)) {
+			CIC_NO = reqAtt.getAttributeStringValue("cicNo");
 		}else {
-			CIC_NO = reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO");
+			CIC_NO = reqAtt.getAttributeStringValue("parGrdCicNo");
 		}
 		
 		def QRY0_A;
@@ -298,7 +298,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		processItem = false;
 		requestAttributes.eachWithIndex {reqAttItem, index ->
 			String CIC_ITEM_NO = ""
-			CIC_ITEM_NO = reqAttItem.getAttributeStringValue("CIC_ITM_NO").toString().trim();
+			CIC_ITEM_NO = reqAttItem.getAttributeStringValue("cicItmNo").toString().trim();
 			def QRY0;
 			QRY0 = sql.firstRow("select a.DSTRCT_CODE,a.CONTRACT_NO,a.WORK_ORDER,a.CIC_NO,b.CIC_ITEM_NO " +
 					"from aca.kpf38f a " +
@@ -356,7 +356,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 					StrErr = "INVALID CIC NUMBER / DOESN'T EXIST"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("CIC_NO")
+					err.setFieldId("cicNo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -367,7 +367,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 						StrErr = "CIC STATUS MUST IN ESTIMATE"
 						SetErrMes();
 						com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-						//err.setFieldId("CIC_NO")
+						//err.setFieldId("cicNo")
 						result.addError(err)
 						results.add(result)
 						RollErrMes();
@@ -380,7 +380,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				//Validate CIC Item No
 				log.info("Val CIC Item : ")
 				String CIC_ITEM_NO = ""
-				CIC_ITEM_NO = reqAttItem.getAttributeStringValue("CIC_ITM_NO").toString().trim()
+				CIC_ITEM_NO = reqAttItem.getAttributeStringValue("cicItmNo").toString().trim()
 				log.info("CIC_ITEM_NO : " + CIC_ITEM_NO )
 				def QRY3;
 				QRY3 = sql.firstRow("select * from ACA.KPF38G where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"' and CIC_ITEM_NO = '"+CIC_ITEM_NO+"'");
@@ -388,7 +388,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 					StrErr = "CIC ITEM NUMBER DOES NOT EXIST"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					//err.setFieldId("CIC_NO")
+					//err.setFieldId("cicNo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -403,7 +403,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 					StrErr = "CONTRACT USER NO UNMATCH WITH CIC ITEM NO"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					//err.setFieldId("CIC_NO")
+					//err.setFieldId("cicNo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -420,7 +420,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				 StrErr = "INVALID CIC ITEM DESC."
 				 SetErrMes();
 				 com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				 //err.setFieldId("CIC_NO")
+				 //err.setFieldId("cicNo")
 				 result.addError(err)
 				 results.add(result)
 				 RollErrMes();
@@ -431,7 +431,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				 StrErr = "INVALID CATEG BASE UNIT"
 				 SetErrMes();
 				 com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				 //err.setFieldId("CIC_NO")
+				 //err.setFieldId("cicNo")
 				 result.addError(err)
 				 results.add(result)
 				 RollErrMes();
@@ -448,17 +448,17 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				 */
 
 				BigDecimal CAT_BASE_PR_RT = 0;
-				if (reqAttItem.getAttributeBigDecimalValue("BASE_RATE").equals(null)) {
+				if (reqAttItem.getAttributeBigDecimalValue("baseRate").equals(null)) {
 					StrErr = "INVALID CATEG BASE PRICE RATE"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					//err.setFieldId("CIC_NO")
+					//err.setFieldId("cicNo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
 					return results
 				}else {
-					CAT_BASE_PR_RT = reqAttItem.getAttributeBigDecimalValue("BASE_RATE");
+					CAT_BASE_PR_RT = reqAttItem.getAttributeBigDecimalValue("baseRate");
 				}
 
 				BigDecimal EX_RATE = 0;
@@ -497,46 +497,46 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				BigDecimal TOTAL_CUM_COST = 0;
 				CEK_REM = 0;
 
-				if (reqAttItem.getAttributeBigDecimalValue("EST_QTY").equals(null)) {
+				if (reqAttItem.getAttributeBigDecimalValue("estQty").equals(null)) {
 					ESTIMATED_QTY = 0
 				}else {
-					ESTIMATED_QTY = reqAttItem.getAttributeBigDecimalValue("EST_QTY");
+					ESTIMATED_QTY = reqAttItem.getAttributeBigDecimalValue("estQty");
 				}
 				if(ESTIMATED_QTY < 0) {
 					StrErr = "COULD NOT INPUT NEGATIVE QUANTITY"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("EST_QTY")
+					err.setFieldId("estQty")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
 					return results
 				}
-				if (reqAttItem.getAttributeBigDecimalValue("ACT_QTY").equals(null)) {
+				if (reqAttItem.getAttributeBigDecimalValue("actQty").equals(null)) {
 					ACTUAL_QTY = 0
 				}else {
-					ACTUAL_QTY = reqAttItem.getAttributeBigDecimalValue("ACT_QTY");
+					ACTUAL_QTY = reqAttItem.getAttributeBigDecimalValue("actQty");
 				}
 				if(ACTUAL_QTY < 0) {
 					StrErr = "COULD NOT INPUT NEGATIVE QUANTITY"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("ACT_QTY")
+					err.setFieldId("actQty")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
 					return results
 				}
-				if (reqAttItem.getAttributeBigDecimalValue("VAL").equals(null)) {
+				if (reqAttItem.getAttributeBigDecimalValue("val").equals(null)) {
 					PROGRESS = 0
 				}else {
-					PROGRESS = reqAttItem.getAttributeBigDecimalValue("VAL");
+					PROGRESS = reqAttItem.getAttributeBigDecimalValue("val");
 				}
 				if(PROGRESS < 0) {
 					StrErr = "COULD NOT INPUT NEGATIVE VALUE"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					err.setFieldId("VAL")
+					err.setFieldId("val")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -608,7 +608,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 					StrErr = StrErr.replace("VALUATION", "CIC")
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					//err.setFieldId("CIC_NO")
+					//err.setFieldId("cicNo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -783,7 +783,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 					StrErr = StrErr.replace("VALUATION", "CIC")
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					//err.setFieldId("CIC_NO")
+					//err.setFieldId("cicNo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -797,7 +797,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				 StrErr = StrErr.replace("VALUATION", "CIC")
 				 SetErrMes();
 				 com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				 //err.setFieldId("CIC_NO")
+				 //err.setFieldId("cicNo")
 				 result.addError(err)
 				 results.add(result)
 				 RollErrMes();
@@ -818,24 +818,24 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		RequestAttributes reqAtt = requestAttributes[0]
 		DST = securityToken.getDistrict();
 		String CNT_NO = "";
-		if (reqAtt.getAttributeStringValue("PAR_CNT_NO").equals(null)) {
-			CNT_NO = reqAtt.getAttributeStringValue("CNT_NO");
+		if (reqAtt.getAttributeStringValue("parCntNo").equals(null)) {
+			CNT_NO = reqAtt.getAttributeStringValue("cntNo");
 		}else {
-			CNT_NO = reqAtt.getAttributeStringValue("PAR_CNT_NO");
+			CNT_NO = reqAtt.getAttributeStringValue("parCntNo");
 		}
 
 		String WO = "";
-		if (reqAtt.getAttributeStringValue("PAR_WO").equals(null)) {
-			WO = reqAtt.getAttributeStringValue("WO");
+		if (reqAtt.getAttributeStringValue("parWo").equals(null)) {
+			WO = reqAtt.getAttributeStringValue("wo");
 		}else {
-			WO = reqAtt.getAttributeStringValue("PAR_WO");
+			WO = reqAtt.getAttributeStringValue("parWo");
 		}
 		WO_NO_GLBL = "";
 		String CIC_NO = "";
-		if (reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO").equals(null)) {
-			CIC_NO = reqAtt.getAttributeStringValue("CIC_NO");
+		if (reqAtt.getAttributeStringValue("parGrdCicNo").equals(null)) {
+			CIC_NO = reqAtt.getAttributeStringValue("cicNo");
 		}else {
-			CIC_NO = reqAtt.getAttributeStringValue("PAR_GRD_CIC_NO");
+			CIC_NO = reqAtt.getAttributeStringValue("parGrdCicNo");
 		}
 
 		Boolean ACT_FLAG = false;
@@ -868,7 +868,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				StrErr = "INVALID CIC NUMBER / DOESN'T EXIST"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				err.setFieldId("CIC_NO")
+				err.setFieldId("cicNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -879,7 +879,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 					StrErr = "CIC STATUS MUST IN ESTIMATE"
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-					//err.setFieldId("CIC_NO")
+					//err.setFieldId("cicNo")
 					result.addError(err)
 					results.add(result)
 					RollErrMes();
@@ -892,7 +892,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 			//Validate CIC Item No
 			log.info("Val CIC Item : ")
 			String CIC_ITEM_NO = ""
-			CIC_ITEM_NO = reqAttItem.getAttributeStringValue("CIC_ITM_NO").toString().trim()
+			CIC_ITEM_NO = reqAttItem.getAttributeStringValue("cicItmNo").toString().trim()
 			log.info("CIC_ITEM_NO : " + CIC_ITEM_NO )
 			def QRY3;
 			QRY3 = sql.firstRow("select * from ACA.KPF38G where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"' and CIC_ITEM_NO = '"+CIC_ITEM_NO+"'");
@@ -900,7 +900,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				StrErr = "CIC ITEM NUMBER DOES NOT EXIST"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("CIC_NO")
+				//err.setFieldId("cicNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -915,7 +915,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				StrErr = "CONTRACT USER NO UNMATCH WITH CIC ITEM NO"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("CIC_NO")
+				//err.setFieldId("cicNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
@@ -937,7 +937,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				StrErr = StrErr.replace("VALUATION", "CIC")
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("CIC_NO")
+				//err.setFieldId("cicNo")
 				result.addError(err)
 				results.add(result)
 				RollErrMes();
