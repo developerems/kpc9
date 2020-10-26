@@ -12,28 +12,21 @@ import com.mincom.ellipse.errors.exceptions.FatalException
 import com.mincom.ellipse.script.plugin.GenericScriptCreate
 import com.mincom.ellipse.script.plugin.GenericScriptDelete
 import com.mincom.ellipse.script.plugin.GenericScriptExecute
-import com.mincom.ellipse.script.plugin.GenericScriptExecuteForCollection
 import com.mincom.ellipse.script.plugin.GenericScriptPlugin
 import com.mincom.ellipse.script.plugin.GenericScriptResults
 import com.mincom.ellipse.script.plugin.GenericScriptUpdate
 import com.mincom.ellipse.script.plugin.RequestAttributes
 import com.mincom.ellipse.script.plugin.GenericScriptResult
-import com.mincom.ellipse.script.plugin.RestartAttributes
 import groovy.sql.Sql;
 
 import java.text.DecimalFormat
 import com.mincom.enterpriseservice.ellipse.*
 import com.mincom.enterpriseservice.exception.EnterpriseServiceOperationException
-import com.mincom.ellipse.errors.Error;
 import com.mincom.ellipse.errors.UnlocalisedError
 import com.mincom.ellipse.errors.UnlocalisedMessage
-import com.mincom.ellipse.errors.UnlocalisedWarning
 import com.mincom.ellipse.errors.CobolMessages;
-import com.mincom.enterpriseservice.ellipse.valuations.ValuationsService
 import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceCreateReplyDTO
-import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceCreateRequestDTO
 import com.mincom.enterpriseservice.ellipse.valuations.ValuationsServiceDeleteReplyDTO
-
 
 public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptExecute, GenericScriptUpdate, GenericScriptCreate, GenericScriptDelete{
 	String version = "1";
@@ -60,13 +53,19 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		RequestAttributes reqAtt = requestAttributes[0];
 
 		String CNT_NO = "";
-		if (!reqAtt.getAttributeStringValue("diaCntNo").equals(null)) {
+		if (reqAtt.getAttributeStringValue("diaCntNo") != null) {
 			CNT_NO = reqAtt.getAttributeStringValue("diaCntNo");
 		}
-		else if (reqAtt.getAttributeStringValue("parGrdCntNo").equals(null)) {
+		else if (reqAtt.getAttributeStringValue("parGrdCntNo") == null) {
 			CNT_NO = reqAtt.getAttributeStringValue("cntNo");
 		}else {
 			CNT_NO = reqAtt.getAttributeStringValue("parGrdCntNo");
+		}
+
+		if (!CNT_NO) {
+			CNT_NO = ""
+		} else {
+			CNT_NO = CNT_NO.trim()
 		}
 
 		String CIC_NO = "";
@@ -79,6 +78,12 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			CIC_NO = reqAtt.getAttributeStringValue("parGrdCicNo");
 		}
 
+		if (!CIC_NO) {
+			CIC_NO = ""
+		} else {
+			CIC_NO = CIC_NO.trim()
+		}
+
 		String WO = "";
 		if (!reqAtt.getAttributeStringValue("diaParWo").equals(null)) {
 			WO = reqAtt.getAttributeStringValue("diaParWo");
@@ -88,11 +93,29 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		}else {
 			WO = reqAtt.getAttributeStringValue("parGrdWoNo");
 		}
+
+		if (!WO) {
+			WO = ""
+		} else {
+			WO = WO.trim()
+		}
+
 		log.info("CNT_NO : " + CNT_NO );
 		log.info("CIC_NO : " + CIC_NO );
 		log.info("WO : " + WO );
 		DecimalFormat df = new DecimalFormat("#,##0.00;-#,##0.00");
 		def QRY1;
+		String query1 = "select a.*,a.CONTRACT_VAL - b.INV_VAL REM_ACT,(a.CONTRACT_VAL - b.INV_VAL) - EST_VAL REM_PLN,trim(d.table_desc) CCOC_DESC " +
+				"from msf384 a " +
+				"left outer join ( " +
+				"select CONTRACT_NO,sum(case when CIC_STATUS = '1' then EST_COST else 0 end) EST_VAL, " +
+				"sum(case when CIC_STATUS in ('2','4') then ACT_COST else 0 end) INV_VAL " +
+				"from ACA.KPF38F " +
+				"where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) " +
+				"group by CONTRACT_NO " +
+				") b on (1=1) " +
+				"left outer join msf010 d on (trim(a.COND_OF_CNTRCT) = trim(d.table_code) and trim(d.table_type) = 'CCOC') " +
+				"where a.DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(a.CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) "
 
 		QRY1 = sql.firstRow("select a.*,a.CONTRACT_VAL - b.INV_VAL REM_ACT,(a.CONTRACT_VAL - b.INV_VAL) - EST_VAL REM_PLN,trim(d.table_desc) CCOC_DESC " +
 				"from msf384 a " +
@@ -105,89 +128,98 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				") b on (1=1) " +
 				"left outer join msf010 d on (trim(a.COND_OF_CNTRCT) = trim(d.table_code) and trim(d.table_type) = 'CCOC') " +
 				"where a.DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(a.CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) ");
+		log.info("query1: $query1")
+		log.info("QRY1: $QRY1")
 
-		if(!QRY1.equals(null)) {
+		if(QRY1) {
 			result.addAttribute("coc", QRY1.CCOC_DESC);
 			result.addAttribute("cocCode", QRY1.COND_OF_CNTRCT);
 			result.addAttribute("remAct", QRY1.REM_ACT);
 			result.addAttribute("remPlan", QRY1.REM_PLN);
+			result.addAttribute("contractDesc", QRY1.CONTRACT_DESC)
 			String qryCIC = "";
 			String qryWO = "";
-			if(CIC_NO.equals(null) || CIC_NO.equals("")) {
+
+			if(!CIC_NO || CIC_NO == "") {
 				qryCIC = "";
 			}else {
-				qryCIC = " and upper(trim(a.CIC_NO)) = upper(trim('"+CIC_NO+"')) ";
+				qryCIC = " and upper(trim(a.CIC_NO)) = upper(trim('$CIC_NO'))";
 			}
-			/*
-			 if(WO.equals(null) || WO.equals("")) {
-			 qryWO = "";
-			 }else {
-			 qryWO = " and upper(trim(WORK_ORDER)) = upper(trim('"+WO+"')) ";
-			 }
-			 if(QRY1.COND_OF_CNTRCT.trim().equals("NU")) {
-			 QRY1 = sql.firstRow("select * from ACA.KPF38F " +
-			 "where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) "+qryCIC+"");
-			 log.info ("FIND CIC  : " + QRY1);
-			 }else {
-			 QRY1 = sql.firstRow("select * from ACA.KPF38F " +
-			 "where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) "+qryCIC+" "+qryWO+"");
-			 log.info ("FIND CIC  : " + QRY1);
-			 }
-			 */
+
+			if(!WO || WO == "") {
+				qryWO = "";
+			}else {
+				qryWO = " and upper(trim(a.WORK_ORDER)) = upper(trim('$WO')) ";
+			}
 			String MODE = "";
 			result.addAttribute("mode", " ");
-			QRY1 = sql.firstRow("select a.*,case when b.EQUIP_NO is null then ' ' else b.EQUIP_NO end EQP_NO,case when b.DSTRCT_ACCT_CODE is null then ' ' else replace(b.DSTRCT_ACCT_CODE,a.dstrct_code) end ACCT_CODE from ACA.KPF38F a " +
-					"left outer join msf620 b on (a.dstrct_code = b.dstrct_code and a.work_order = b.work_order) " +
-					"where a.DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(a.CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) "+qryCIC+"");
-			log.info ("FIND CIC  : " + QRY1);
-			if(!QRY1.equals(null)) {
-				result.addAttribute("cicInv", QRY1.CIC_INVOICE);
-				result.addAttribute("wo", QRY1.WORK_ORDER);
-				result.addAttribute("dst", QRY1.DSTRCT_CODE);
-				result.addAttribute("estCst", QRY1.EST_COST);
-				result.addAttribute("actCst", QRY1.ACT_COST);
-				result.addAttribute("originator", QRY1.ORIGINATOR_CIC);
-				result.addAttribute("estDate", QRY1.EST_DATE);
-				result.addAttribute("acceptBy", QRY1.COMPL_BY);
-				result.addAttribute("accDate", QRY1.COMPL_DATE);
-				result.addAttribute("eqpNo", QRY1.EQP_NO);
-				result.addAttribute("acctCode", QRY1.ACCT_CODE);
-				if (QRY1.CUM_COST == 0) {
-					result.addAttribute("totVal", QRY1.ACT_COST);
+			String query2 = "select a.*," +
+					"case when b.equip_no is null then ' ' else b.equip_no end EQP_NO, " +
+					"case when b.dstrct_acct_code is null then ' ' else replace(b.dstrct_acct_code,a.dstrct_code) end ACCT_CODE " +
+					"from ACA.KPF38F a " +
+					"left outer join msf620 b on (a.dstrct_code = b.dstrct_code and a.work_order = b.work_order and a.contract_no = b.orig_doc_no) " +
+					"where a.dstrct_code = '${securityToken.getDistrict()}' " +
+					"and upper(trim(a.CONTRACT_NO)) = upper(trim('$CNT_NO')) " +
+					"$qryCIC" +
+					"$qryWO"
+			log.info("queryARS : $query2")
+			def QRY2 = sql.firstRow(query2)
+			log.info ("FIND CIC  : $QRY2");
+			if(QRY2) {
+				result.addAttribute("cicInv", QRY2.CIC_INVOICE);
+				result.addAttribute("wo", QRY2.WORK_ORDER);
+				result.addAttribute("dst", QRY2.DSTRCT_CODE);
+				result.addAttribute("estCst", QRY2.EST_COST);
+				result.addAttribute("actCst", QRY2.ACT_COST);
+				result.addAttribute("originator", QRY2.ORIGINATOR_CIC);
+				result.addAttribute("estDate", QRY2.EST_DATE);
+				result.addAttribute("acceptBy", QRY2.COMPL_BY);
+				result.addAttribute("accDate", QRY2.COMPL_DATE);
+				result.addAttribute("eqpNo", QRY2.EQP_NO);
+				result.addAttribute("acctCode", QRY2.ACCT_CODE);
+				result.addAttribute("cicNo", QRY2.CIC_NO);
+				if (QRY2.CUM_COST == 0) {
+					result.addAttribute("totVal", QRY2.ACT_COST);
 				}else {
-					result.addAttribute("totVal", QRY1.CUM_COST);
+					result.addAttribute("totVal", QRY2.CUM_COST);
 				}
 
-				if (QRY1.CIC_STATUS.trim().equals("1")) {
+				if (QRY2.CIC_STATUS.trim().equals("1")) {
 					result.addAttribute("cicStat", "Estimated");
-				}else if (QRY1.CIC_STATUS.trim().equals("2")) {
+				}else if (QRY2.CIC_STATUS.trim().equals("2")) {
 					result.addAttribute("cicStat", "Accepted");
-				}else if (QRY1.CIC_STATUS.trim().equals("3")) {
+				}else if (QRY2.CIC_STATUS.trim().equals("3")) {
 					result.addAttribute("cicStat", "Canceled");
-				}else if (QRY1.CIC_STATUS.trim().equals("4")) {
+				}else if (QRY2.CIC_STATUS.trim().equals("4")) {
 					result.addAttribute("cicStat", "Invoiced");
-				}else if (QRY1.CIC_STATUS.trim().equals("U")) {
+				}else if (QRY2.CIC_STATUS.trim().equals("U")) {
 					result.addAttribute("cicStat", "Awaiting Approval");
-				}else if (QRY1.CIC_STATUS.trim().equals("R")) {
+				}else if (QRY2.CIC_STATUS.trim().equals("R")) {
 					result.addAttribute("cicStat", "Rejected");
 				}
-				result.addAttribute("MODE", QRY1.CIC_TYPE);
-				result.addAttribute("cicDesc", QRY1.CIC_DESC.trim());
+				result.addAttribute("MODE", QRY2.CIC_TYPE);
+				result.addAttribute("cicDesc", QRY2.CIC_DESC.trim());
 				def QRY7 = sql.firstRow("select * from msf071 " +
-						"where ENTITY_TYPE = 'CIV' and trim(ENTITY_VALUE) = trim('${securityToken.getDistrict()}${QRY1.CONTRACT_NO.trim()}${QRY1.CIC_NO.trim()}') and REF_NO = '001' and SEQ_NUM = '001'");
+						"where ENTITY_TYPE = 'CIV' and trim(ENTITY_VALUE) = trim('${securityToken.getDistrict()}$CNT_NO$CIC_NO') and REF_NO = '001' and SEQ_NUM = '001'");
+				log.info("select * from msf071 " +
+						"where ENTITY_TYPE = 'CIV' and trim(ENTITY_VALUE) = trim('${securityToken.getDistrict()}$CNT_NO$CIC_NO') and REF_NO = '001' and SEQ_NUM = '001'")
 				log.info ("FIND VALN_NO  : " + QRY7);
-				if(!QRY7.equals(null)) {
+				if(QRY7) {
 					result.addAttribute("cicValnNo", QRY7.REF_CODE.trim());
 				}
 			}
 		}
-		result.addAttribute("cntNo", QRY1.CONTRACT_NO);
-		result.addAttribute("cicNo", QRY1.CIC_NO);
-		result.addAttribute("wo", QRY1.WORK_ORDER);
+//		result.addAttribute("cntNo", QRY1.CONTRACT_NO);
+//		result.addAttribute("wo", QRY1.WORK_ORDER);
+
+		result.addAttribute("cntNo", CNT_NO)
+//		result.addAttribute("cicNo", CIC_NO)
+		result.addAttribute("wo", WO)
 
 		results.add(result);
 		return results;
 	}
+
 	public GenericScriptResults create(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
 	throws FatalException {
 		log.info("Create ELL38C_DETAIL : " + version )
@@ -582,6 +614,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		results.add(result);
 		return results;
 	}
+
 	public GenericScriptResults update(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
 	throws FatalException {
 		log.info("Update ELL38C_DETAIL : " + version );
@@ -768,6 +801,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		results.add(result);
 		return results;
 	}
+
 	public GenericScriptResults delete(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
 	throws FatalException {
 		log.info("Delete ELL38C_DETAIL : " + version )
@@ -928,6 +962,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 		results.add(result);
 		return results;
 	}
+
 	private String SetErrMes(){
 		String Qerr = "UPDATE msf010 set TABLE_DESC = ? where TABLE_type = 'ER' and TABLE_CODE = '8541'";
 		try

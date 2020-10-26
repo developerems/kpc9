@@ -6,7 +6,6 @@
  * 20190101 - a9ra5213 - Ricky Afriano - KPC UPGRADE Ellipse 8
  *            Initial Coding - Display CIC items in ELL38C Detail Screen 
  **/
-package KPC
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.Date

@@ -131,7 +131,11 @@ public class ELL386_SEARCH extends GenericScriptPlugin implements GenericScriptE
 			}
 		}else {
 			log.info("restartAttributes : " + restartAttributes.getAttributeStringValue("lastRow") );
-		    Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
+//		    Integer MaxInst = Integer.parseInt(restartAttributes.getAttributeStringValue("lastRow"));
+			String lastRowString = restartAttributes.getAttributeStringValue("lastRow")
+			log.info("lastRowString: $lastRowString")
+			Integer MaxInst = lastRowString.toInteger()
+			log.info("MaxInst: $MaxInst")
 		    //MaxInst = MaxInst + maxNumberOfObjects
 			StrSQL = "select row_number () over(order by a.PORTION_NO,a.ELEMENT_NO,b.CATEGORY_NO) AS NO,a.PORTION_NO,a.ELEMENT_NO,b.CATEGORY_NO,regexp_replace(b.CATEG_DESC,'�|','') CATEG_DESC,b.CATEG_BASE_QTY,b.CATEG_BASE_UN, " +
 				"case when trim(c.TABLE_DESC) is null then ' ' else trim(c.TABLE_DESC) end CATEG_BASE_UN_DESC, " +
@@ -147,7 +151,11 @@ public class ELL386_SEARCH extends GenericScriptPlugin implements GenericScriptE
 			sql.eachRow(StrSQL, {
 				if ((!WO.equals(null) && it.COND_OF_CNTRCT.trim().equals("UM")) || (it.COND_OF_CNTRCT.trim().equals("CB") || it.COND_OF_CNTRCT.trim().equals("NU"))) {
 					GenericScriptResult result = new GenericScriptResult();
-					MaxInst = Integer.parseInt(it.NO);
+					String maxInstArs = it.NO
+					MaxInst = maxInstArs.toInteger()
+					log.info("maxInstArs: $maxInstArs")
+					log.info("MaxInst2: $MaxInst")
+//					MaxInst = Integer.parseInt(it.NO);
 					result.addAttribute("noUrut", it.NO);
 					result.addAttribute("portion", it.PORTION_NO);
 					result.addAttribute("element", it.ELEMENT_NO);
