@@ -244,7 +244,7 @@ public class ELL386_SEARCH extends GenericScriptPlugin implements GenericScriptE
 			def QRY1;
 			QRY1 = sql.firstRow("select * from msf384 where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) ");
 			//log.info ("FIND CONTRACT  : " + QRY1);
-			if(QRY1.equals(null)) {
+			if(!QRY1) {
 				StrErr = "INVALID CONTRACT NUMBER / DOESN'T EXIST"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
@@ -256,6 +256,8 @@ public class ELL386_SEARCH extends GenericScriptPlugin implements GenericScriptE
 			}
 			String CURR_TYPE = QRY1.CURRENCY_TYPE;
 			String CIC_TYPE = "";
+			String condOfCntrct = QRY1.COND_OF_CNTRCT ? QRY1.COND_OF_CNTRCT : ""
+			log.info("condOfCntrct: $condOfCntrct")
 			//Validate CIC No
 			def QRY2;
 			QRY2 = sql.firstRow("select * from ACA.KPF38F where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
@@ -319,7 +321,9 @@ public class ELL386_SEARCH extends GenericScriptPlugin implements GenericScriptE
 			//Validate Category
 			def QRY4;
 			QRY4 = sql.firstRow("select a.*,substr(replace(trim(replace(a.CATEG_DESC,'�','')),'’',''''),1,40) CATEG_DESC2 from MSF387 a where upper(trim(a.CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and trim(a.PORTION_NO)||trim(a.ELEMENT_NO)||trim(a.CATEGORY_NO) = '"+CIC_ITEM_NO+"'");
-			if(QRY4.equals(null)) {
+			String categBaseUnit = QRY4.CATEG_BASE_UN ? QRY4.CATEG_BASE_UN : ""
+			log.info("categBaseUnit: $categBaseUnit")
+			if(!QRY4) {
 				StrErr = "CONTRACT USER NO UNMATCH WITH CIC ITEM NO"
 				SetErrMes();
 				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
@@ -347,60 +351,50 @@ public class ELL386_SEARCH extends GenericScriptPlugin implements GenericScriptE
 				return results
 			}
 			log.info ("CIC_ITM_DESC is : " + CIC_ITM_DESC);
-			String CAT_BASE_PR_RT = "";
-			if (reqAttItem.getAttributeBigDecimalValue("catBasePrRt").equals(null)) {
-				StrErr = "INVALID CATEG BASE PRICE RATE"
-				SetErrMes();
-				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("cicNo")
-				result.addError(err)
-				results.add(result)
-				RollErrMes();
-				return results
-			}else {
-				CAT_BASE_PR_RT = reqAttItem.getAttributeBigDecimalValue("catBasePrRt").toString();
+
+			String itemType
+			if ((condOfCntrct.trim() == "CB" && categBaseUnit.trim() == "") || condOfCntrct == "NU"){
+				itemType = "MILESTONE"
+			} else {
+				itemType = "CATEGORY"
 			}
-			String CAT_UNIT = "";
-			if (reqAttItem.getAttributeStringValue("catUnit").equals(null)) {
-				StrErr = "INVALID CATEG BASE UNIT"
-				SetErrMes();
-				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
-				//err.setFieldId("cicNo")
-				result.addError(err)
-				results.add(result)
-				RollErrMes();
-				return results
-			}else {
-				CAT_UNIT = reqAttItem.getAttributeStringValue("catUnit").toString();
-			}
-			if(CAT_UNIT.equals("")) {
+			log.info("itemType: $itemType")
+
+			String CAT_UNIT
+			String CAT_BASE_PR_RT
+			if ((condOfCntrct.trim() == 'UM') || (condOfCntrct.trim() == "CB" && itemType == "CATEGORY") ) {
+				if (!reqAttItem.getAttributeStringValue("catUnit")) {
+					StrErr = "INVALID CATEG BASE UNIT"
+					SetErrMes();
+					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
+					result.addError(err)
+					results.add(result)
+					RollErrMes();
+					return results
+				} else {
+					CAT_UNIT = reqAttItem.getAttributeStringValue("catUnit").toString();
+				}
+
+				if (!reqAttItem.getAttributeBigDecimalValue("catBasePrRt")) {
+					StrErr = "INVALID CATEG BASE PRICE RATE"
+					SetErrMes();
+					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
+					result.addError(err)
+					results.add(result)
+					RollErrMes()
+					return results
+				}
+			} else {
 				CAT_UNIT = " "
 			}
-			/*
-			BigDecimal EX_RATE = 0;
-			Boolean FOREIGN_TRANS = false;
-			//Validate Currency
-			def QRY5;
-			QRY5 = sql.firstRow("select * from MSF000_DC0001 where DSTRCT_CODE = '"+securityToken.getDistrict()+"'");
-			if(!QRY5.equals(null)) {
-				if (!CURR_TYPE.trim().equals(QRY5.LOCAL_CURRENCY)) {
-					FOREIGN_TRANS = true;
-					
-				}else {
-					FOREIGN_TRANS = false;
-				}
-			}
-			GET EX_RATE
-			select * from msf912
-			where LOCAL_CURRENCY = 'USD' and FOREIGN_CURR = 'IDR'
-			order by 99999999-DATE_PER_REVSD desc OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY;
-			*/
+			CAT_BASE_PR_RT = reqAttItem.getAttributeBigDecimalValue("catBasePrRt").toString()
+
 			try
 			{
 				GetNowDateTime();
 				//log.info ("CIC_ITM_DESC 2 : " + CIC_ITM_DESC);
 				String QueryInsert = ("Insert into ACA.KPF38G (DSTRCT_CODE,CONTRACT_NO,CIC_NO,CIC_ITEM_NO,CIC_TYPE,CIC_ITEM_DESC,CATEG_BASE_RATE,CATEG_BASE_UN,ESTIMATED_QTY,ACTUAL_QTY,PROGRESS,TOTAL_EST,TOTAL_ACT,PROGRESS_S,TOTAL_ACT_S,PROGRESS_F,TOTAL_ACT_F,TOTAL_EST_L,TOTAL_EST_S,TOTAL_EST_F) values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
-				//log.info ("QueryInsert : " + QueryInsert);
+				log.info ("QueryInsert : " + QueryInsert);
 				sql.executeInsert(QueryInsert,[securityToken.getDistrict(),CNT_NO,CIC_NO,CIC_ITEM_NO,CIC_TYPE,CIC_ITM_DESC,CAT_BASE_PR_RT,CAT_UNIT,0,0,0,0,0,0,0,0,0,0,0,0]);
 			} catch (Exception  e) {
 				log.info ("Exception is : " + e);

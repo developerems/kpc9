@@ -15,11 +15,6 @@ import javax.naming.InitialContext
 
 import com.mincom.ellipse.attribute.Attribute
 import com.mincom.ellipse.hook.hooks.ServiceHook
-import com.mincom.ellipse.service.m3875.approvalsmanager.ApprovalsManagerService
-import com.mincom.ellipse.types.m3875.instances.TransactionRetrievalCriteriaSearchParam
-import com.mincom.ellipse.types.m3875.instances.TransactionDTO
-import com.mincom.ellipse.types.m3875.instances.TransactionServiceResult
-import com.mincom.enterpriseservice.ellipse.equipment.EquipmentServiceReadReplyDTO
 import com.mincom.enterpriseservice.ellipse.equipment.EquipmentServiceModifyRequestDTO
 import com.mincom.ellipse.service.ServiceDTO
 import com.mincom.enterpriseservice.exception.*
@@ -128,13 +123,6 @@ class EquipmentService_modify extends ServiceHook{
 							"9999", "INPUT SHOULD BE NUMERIC!", "equipTargetLife", 0, 0))
 							return input
 						}
-
-//						if (isNumeric(EQP_TAR_LIFE) == false) {
-//							throw new EnterpriseServiceOperationException(
-//							new ErrorMessageDTO(
-//							"9999", "INPUT SHOULD BE NUMERIC!", "equipTargetLife", 0, 0))
-//							return input
-//						}
 					}
 				}
 			}
@@ -158,6 +146,9 @@ class EquipmentService_modify extends ServiceHook{
 		if (EQP_NO) {
 			List<Attribute> custAttribs = c.getCustomAttributes()
 			custAttribs.each{Attribute customAttribute ->
+				log.info("Attribute Name: ${customAttribute.getName()}")
+				log.info("Attribute Value: ${customAttribute.getValue()}")
+				log.info("Attribute Namespace: ${customAttribute.getNamespace()}")
 				if (customAttribute.getName() == new String("newTargetLifeUnit")){
 					GetNowDateTime()
 					String TAR_LIFE_UNIT = customAttribute.getValue()

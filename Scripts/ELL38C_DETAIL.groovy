@@ -197,7 +197,7 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 				}else if (QRY2.CIC_STATUS.trim().equals("R")) {
 					result.addAttribute("cicStat", "Rejected");
 				}
-				result.addAttribute("MODE", QRY2.CIC_TYPE);
+				result.addAttribute("mode", QRY2.CIC_TYPE);
 				result.addAttribute("cicDesc", QRY2.CIC_DESC.trim());
 				def QRY7 = sql.firstRow("select * from msf071 " +
 						"where ENTITY_TYPE = 'CIV' and trim(ENTITY_VALUE) = trim('${securityToken.getDistrict()}$CNT_NO$CIC_NO') and REF_NO = '001' and SEQ_NUM = '001'");
@@ -604,8 +604,6 @@ public class ELL38C_DETAIL extends GenericScriptPlugin implements GenericScriptE
 			RollErrMes();
 			return results
 		}
-
-
 
 		result.addAttribute("cntNo", CNT_NO);
 		result.addAttribute("cicNo", NewCIC);

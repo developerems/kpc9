@@ -29,13 +29,14 @@ class fetchEquipLifeTime extends GenericScriptPlugin implements GenericScriptExe
         log.info("District: $districtCode")
 
         String query600 = "SELECT LAST_MOD_EMP FROM MSF600 WHERE DSTRCT_CODE = '$districtCode' AND EQUIP_NO = '$equipmentNo'"
-
+        log.info("query select MSF600: $query600")
         def query600Result = sql.firstRow(query600)
         log.info("--- query600: $query600")
         log.info("--- query600 result: $query600Result")
 
+        String lastModEmp
         if (query600Result) {
-            String lastModEmp = query600Result.LAST_MOD_EMP ? query600Result.LAST_MOD_EMP.trim() != '' ? query600Result.LAST_MOD_EMP.trim() : null : null
+            lastModEmp = query600Result.LAST_MOD_EMP ? query600Result.LAST_MOD_EMP.trim() != "" ? query600Result.LAST_MOD_EMP.trim() : null : null
             log.info("--- lastModEmp: --$lastModEmp--")
             if (lastModEmp) {
                 GenericScriptResult result = new GenericScriptResult()

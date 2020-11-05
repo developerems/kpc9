@@ -1,4 +1,3 @@
-package KPC.HOOKS
 /**
  *
  * 20200310   Ricky Afriano  - Fix Approved Valuation Value in Cost summary Tab.

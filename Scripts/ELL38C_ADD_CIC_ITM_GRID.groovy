@@ -79,7 +79,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 	String DST = "";
 	String WO_NO_GLBL = "";
 
-	public GenericScriptResults executeForCollection(SecurityToken securityToken, RequestAttributes requestAttributes,
+	GenericScriptResults executeForCollection(SecurityToken securityToken, RequestAttributes requestAttributes,
 			Integer maxNumberOfObjects, RestartAttributes restartAttributes) throws FatalException {
 		log.info("Execute Colection ELL38C_ADD_CIC_ITM_GRID : " + version )
 		GenericScriptResults results = new GenericScriptResults()
@@ -247,7 +247,8 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		}
 		return results
 	}
-	public GenericScriptResults create(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
+
+	GenericScriptResults create(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
 	throws FatalException {
 		log.info("Create ELL38C_ADD_CIC_ITM_GRID : " + version )
 		GenericScriptResults results = new GenericScriptResults()
@@ -257,15 +258,16 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		results.add(result)
 		return results
 	}
-	public GenericScriptResults update(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
+
+	GenericScriptResults update(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
 	throws FatalException {
-		log.info("Update ELL38C_ADD_CIC_ITM_GRID : " + version )
+		log.info("processItem2 " + version )
 		GenericScriptResults results = new GenericScriptResults()
 		GenericScriptResult result = new GenericScriptResult()
 		RequestAttributes reqAtt = requestAttributes[0]
 		DST = securityToken.getDistrict();
 		String CNT_NO = "";
-		if (reqAtt.getAttributeStringValue("parCntNo").equals(null)) {
+		if (!reqAtt.getAttributeStringValue("parCntNo")) {
 			CNT_NO = reqAtt.getAttributeStringValue("cntNo");
 		}else {
 			CNT_NO = reqAtt.getAttributeStringValue("parCntNo");
@@ -623,6 +625,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 							"TOTAL_EST = " + TOTAL_EST.toString() + " , TOTAL_ACT = " +TOTAL_ACT.toString()+ " , PROGRESS_F = "+PROGRESS_F.toString()+ " , TOTAL_ACT_F = " +
 							TOTAL_ACT_F.toString() + " , TOTAL_EST_L = " +TOTAL_EST_L.toString()+" , TOTAL_EST_F = "+TOTAL_EST_F.toString()+ " " +
 							"where upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"' and CIC_ITEM_NO = '"+CIC_ITEM_NO+"'");
+					log.info("ARSQueryXXX:$QueryUpdate")
 					sql.execute(QueryUpdate);
 					/*
 					 if(FOREIGN_TRANS.equals(false)) {
@@ -641,23 +644,18 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 					RollErrMes();
 					return results
 				}
-				/*
-				 TOTAL_EST_COST = TOTAL_EST + QRY2.EST_COST
-				 if(FOREIGN_TRANS.equals(false)) {
-				 TOTAL_ACT_COST = TOTAL_ACT + QRY2.ACT_COST
-				 TOTAL_CUM_COST = PROGRESS + QRY2.CUM_COST
-				 TOTAL_EST_COST = TOTAL_EST_COST + PROGRESS
-				 }else {
-				 TOTAL_ACT_COST = TOTAL_ACT_F + QRY2.ACT_COST
-				 TOTAL_CUM_COST = PROGRESS_F + QRY2.CUM_COST
-				 TOTAL_EST_COST = TOTAL_EST_COST + PROGRESS_F
-				 }*/
 				def QRY6;
 				QRY6 = sql.firstRow("select sum(TOTAL_EST+PROGRESS) EST_COST_L,sum(TOTAL_EST+PROGRESS_F) EST_COST_F, " +
 						"sum(TOTAL_ACT) ACT_COST_L,sum(TOTAL_ACT_F) ACT_COST_F,sum(PROGRESS) CUM_COST_L,sum(PROGRESS_F) CUM_COST_F " +
 						"from aca.kpf38g " +
 						"where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
-				if(QRY6.equals(null)) {
+				String qry = "select sum(TOTAL_EST+PROGRESS) EST_COST_L,sum(TOTAL_EST+PROGRESS_F) EST_COST_F, " +
+						"sum(TOTAL_ACT) ACT_COST_L,sum(TOTAL_ACT_F) ACT_COST_F,sum(PROGRESS) CUM_COST_L,sum(PROGRESS_F) CUM_COST_F " +
+						"from aca.kpf38g " +
+						"where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'"
+				log.info("ARSQry: $qry")
+
+				if(!QRY6) {
 					StrErr = "INVALID CONTARCT / CIC NO";
 					SetErrMes();
 					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541);
@@ -690,6 +688,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 							"set CUM_COST = " +TOTAL_CUM_COST.toString()+ " , ACT_COST = "+TOTAL_ACT_COST.toString()+ " , EST_COST = " + TOTAL_EST_COST.toString() + " , " +
 							"EST_BY = '" + EMP_ID + "' , EST_DATE = '" +strCrDT+ "' " +
 							"where  DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
+					log.info("ARSQuery1: $QueryUpdate")
 					sql.execute(QueryUpdate);
 				} catch (Exception  e) {
 					log.info ("Exception is : " + e);
@@ -809,7 +808,8 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		results.add(result)
 		return results
 	}
-	public GenericScriptResults delete(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
+
+	GenericScriptResults delete(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
 	throws FatalException {
 		log.info("Delete ELL38C_ADD_CIC_ITM_GRID : " + version )
 		GenericScriptResults results = new GenericScriptResults()
@@ -1022,6 +1022,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 						"set CUM_COST = " +TOTAL_CUM_COST.toString()+ " , ACT_COST = "+TOTAL_ACT_COST.toString()+ " , EST_COST = " + TOTAL_EST_COST.toString() + " , " +
 						"EST_BY = '" + EMP_ID + "' , EST_DATE = '" +strCrDT+ "' " +
 						"where  DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
+				log.info("ARSQuery2: $QueryUpdate")
 				sql.execute(QueryUpdate);
 
 				QRY2 = sql.firstRow("select * from ACA.KPF38F where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
@@ -1051,6 +1052,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		results.add(result)
 		return results
 	}
+
 	private String SetErrMes(){
 		String Qerr = "UPDATE msf010 set TABLE_DESC = ? where TABLE_type = 'ER' and TABLE_CODE = '8541'";
 		try
@@ -1063,6 +1065,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 			log.info ("Exception is : " + e);
 		}
 	}
+
 	private String RollErrMes(){
 		StrErr = "ERROR -"
 		String Qerr = "UPDATE msf010 set TABLE_DESC = ? where TABLE_type = 'ER' and TABLE_CODE = '8541'";
@@ -1073,6 +1076,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 			log.info ("Exception is : " + e);
 		}
 	}
+
 	private String MOD_VAL(String CNT_NO,String VAL_NO,BigDecimal CNTR_AMT){
 		String MESSAGE = "";
 		try
@@ -1099,6 +1103,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		}
 		return MESSAGE;
 	}
+
 	private String APP_VAL(String CNT_NO,String VAL_NO,String EMP_ID,String POSITION,String CIC_NO){
 		String MESSAGE = "";
 		try
@@ -1132,6 +1137,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				String QueryUpdate = ("update ACA.KPF38F " +
 						"set CIC_STATUS = '2', COMPL_BY = '"+EMP_ID+"', COMPL_DATE = '" +strCrDT+ "', ACT_COST = ? " +
 						"where upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
+				log.info("ARSQuery3: $QueryUpdate")
 				sql.execute(QueryUpdate,[EST_COST]);
 			}
 			if (APPR_REP_DTO.getValnStatus().equals("U")) {
@@ -1139,6 +1145,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 				String QueryUpdate = ("update ACA.KPF38F " +
 						"set CIC_STATUS = 'U' " +
 						"where upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
+				log.info("ARSQuery4: $QueryUpdate")
 				sql.execute(QueryUpdate);
 			}
 		}catch (EnterpriseServiceOperationException e){
@@ -1153,6 +1160,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		}
 		return MESSAGE;
 	}
+
 	private String MOD_ITM_VAL(String CNT_NO,String CIC_ITEM_NO,String VAL_NO,BigDecimal ACT_VAL,String CIC_TYPE,String EMP_ID,String POSITION,String CIC_NO){
 		String MESSAGE = "";
 		try
@@ -1211,6 +1219,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 			String QueryUpdate = ("update ACA.KPF38F " +
 					"set ACT_BY = '"+EMP_ID+"', ACTUAL_DATE = '" +strCrDT+ "' " +
 					"where upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
+			log.info("ARSQuery5: $QueryUpdate")
 			sql.execute(QueryUpdate);
 
 			//ContractCostingServiceReadReplyDTO
@@ -1374,6 +1383,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		}
 		return MESSAGE;
 	}
+
 	private String DEL_ITM_VAL(String CNT_NO,String CIC_ITEM_NO,String VAL_NO,BigDecimal ACT_VAL,String CIC_TYPE,String EMP_ID,String POSITION,String CIC_NO){
 		String MESSAGE = "";
 		try
@@ -1424,6 +1434,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		}
 		return MESSAGE;
 	}
+
 	public String GetUserEmpID(String user, String district) {
 		String EMP_ID = "";
 		def QRY1;
@@ -1433,6 +1444,7 @@ public class ELL38C_ADD_CIC_ITM_GRID extends GenericScriptPlugin implements Gene
 		}
 		return EMP_ID;
 	}
+
 	public def GetNowDateTime() {
 		Date InPer = new Date();
 
