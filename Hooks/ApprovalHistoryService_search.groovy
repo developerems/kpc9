@@ -29,7 +29,7 @@ class ApprovalHistoryService_search extends ServiceHook{
 
 	@Override
 	Object onPreExecute(Object input) {
-		log.info("Hooks ApprovalHistoryService_retrieve onPreExecute logging.version: $hookVersion")
+		log.info("Hooks ApprovalHistoryService_search onPreExecute logging.version: $hookVersion")
 
 		ApprovalHistorySearchParam c = (ApprovalHistorySearchParam) input
 		log.info("TransactionDTO: " + c)
@@ -47,6 +47,30 @@ class ApprovalHistoryService_search extends ServiceHook{
 					CIC_NO = customAttribute.getValue()
 				}
 			}
+			if(!CNT_NO && !CIC_NO) {
+				throw new EnterpriseServiceOperationException(
+						new ErrorMessageDTO(
+								"0011", "INPUT REQUIRED", "Contract Number CIC, CIC Number", 0, 0))
+
+				return input
+			}
+			else {
+				if(!CNT_NO) {
+					throw new EnterpriseServiceOperationException(
+							new ErrorMessageDTO(
+									"0011", "INPUT REQUIRED", "Contract Number CIC", 0, 0))
+
+					return input
+				}
+				if (!CIC_NO) {
+					throw new EnterpriseServiceOperationException(
+							new ErrorMessageDTO(
+									"0011", "INPUT REQUIRED", "CIC Number", 0, 0))
+
+					return input
+				}
+			}
+
 			def QRY7 = sql.firstRow("select * from msf071 " +
 					"where ENTITY_TYPE = 'CIV' and ENTITY_VALUE = '"+tools.commarea.District.trim()+CNT_NO.trim()+CIC_NO.trim()+"' and REF_NO = '001' and SEQ_NUM = '001'")
 			log.info ("FIND VALN_NO  : " + QRY7)
@@ -70,7 +94,7 @@ class ApprovalHistoryService_search extends ServiceHook{
 
 	@Override
 	Object onPostExecute(Object input, Object result) {
-		log.info("Hooks ApprovalHistoryService_retrieve onPostExecute logging.version: ${hookVersion}")
+		log.info("Hooks ApprovalHistoryService_search onPostExecute logging.version: ${hookVersion}")
 		ApprovalHistorySearchParam c = (ApprovalHistorySearchParam) input
 		ApprovalHistoryServiceResult[] d = (ApprovalHistoryServiceResult[]) result
 		String ContractNo = c.getTransactionApprovalkeyPart1().getValue()

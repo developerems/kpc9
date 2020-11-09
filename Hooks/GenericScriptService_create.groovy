@@ -22,7 +22,7 @@ class GenericScriptService_create extends ServiceHook{
 	
 	@Override
 	Object onPreExecute(Object input) {
-		log.info("Hooks onPreExecute logging.version: ${hookVersion}")
+		log.info("Hooks GenericScriptService_create onPreExecute logging.version: ${hookVersion}")
 		Boolean readAction;
 		readAction = false;
 		String scrptName = "";
@@ -56,10 +56,22 @@ class GenericScriptService_create extends ServiceHook{
 				readAction = true;
 				scrptName = "ELL38C_DETAIL";
 			}
+
+			if (customAttribute.getName() == "grdInvNo") {
+				readAction = true;
+				scrptName = "ELL38I_DETAIL";
+			}
+
+			if (customAttribute.getName() == "scrName" && customAttribute.getValue() == "ELL38I_DETAIL") {
+				readAction = true;
+				scrptName = "ELL38I_DETAIL";
+			}
+
 			if (customAttribute.getName() == "assetNo") {
 				readAction = true;
 				scrptName = "ell685Detail";
 			}
+
 			if (customAttribute.getName() == "scrName" && customAttribute.getValue() == "ell685Detail") {
 				readAction = true;
 				scrptName = "ell685Detail";

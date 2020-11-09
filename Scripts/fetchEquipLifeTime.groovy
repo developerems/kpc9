@@ -34,16 +34,48 @@ class fetchEquipLifeTime extends GenericScriptPlugin implements GenericScriptExe
         log.info("--- query600: $query600")
         log.info("--- query600 result: $query600Result")
 
+        String query071_100 = "SELECT REF_CODE FROM MSF071 WHERE ENTITY_TYPE = 'EQP' AND ENTITY_VALUE = '$equipmentNo' AND REF_NO = '100'"
+        log.info("query select MSF071: $query071_100")
+        def query071_100Result = sql.firstRow(query071_100)
+        log.info("--- query071_100: $query071_100")
+        log.info("--- query071_100 result: $query071_100Result")
+
+        String query071_110 = "SELECT REF_CODE FROM MSF071 WHERE ENTITY_TYPE = 'EQP' AND ENTITY_VALUE = '$equipmentNo' AND REF_NO = '110'"
+        log.info("query select MSF0712: $query071_110")
+        def query071_110Result = sql.firstRow(query071_110)
+        log.info("--- query071_110: $query071_110")
+        log.info("--- query071_110 result: $query071_110Result")
+
+        GenericScriptResult result = new GenericScriptResult()
+
         String lastModEmp
         if (query600Result) {
             lastModEmp = query600Result.LAST_MOD_EMP ? query600Result.LAST_MOD_EMP.trim() != "" ? query600Result.LAST_MOD_EMP.trim() : null : null
             log.info("--- lastModEmp: --$lastModEmp--")
             if (lastModEmp) {
-                GenericScriptResult result = new GenericScriptResult()
                 result.addAttribute("lastModEmp", lastModEmp)
-                results.add(result)
             }
         }
+
+        String equipTargetLife
+        if (query071_100Result) {
+            equipTargetLife = query071_100Result.REF_CODE ? query071_100Result.REF_CODE != "" ? query071_100Result.REF_CODE.trim() : null : null
+            log.info("--- equipTargetLife: --$equipTargetLife--")
+            if (equipTargetLife) {
+                result.addAttribute("equipTargetLife", equipTargetLife)
+            }
+        }
+
+        String targetLifeUnit
+        if (query071_110Result) {
+            targetLifeUnit = query071_110Result.REF_CODE ? query071_110Result.REF_CODE != '' ? query071_110Result.REF_CODE.trim() : null : null
+            log.info("--- targetLifeUnit: --$targetLifeUnit--")
+            if (targetLifeUnit) {
+                result.addAttribute("targetLifeUnit", targetLifeUnit)
+            }
+        }
+
+        results.add(result)
         return results
     }
 }

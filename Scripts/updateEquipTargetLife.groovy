@@ -1,4 +1,3 @@
-package kpc9.Scripts
 
 import com.mincom.ellipse.app.security.SecurityToken
 import com.mincom.ellipse.edoi.ejb.msf071.MSF071Key
@@ -44,21 +43,17 @@ class updateEquipTargetLife extends GenericScriptPlugin implements GenericScript
                 }
             }
 
-            if (requestAttributes.getAttributeStringValue("targetLifeUnit")) {
-                if (requestAttributes.getAttributeStringValue("targetLifeUnit").trim() != "") {
-                    targetLifeUnit = requestAttributes.getAttributeStringValue("targetLifeUnit").trim()
+            if (requestAttributes.getAttributeStringValue("newTargetLifeUnit")) {
+                if (requestAttributes.getAttributeStringValue("newTargetLifeUnit").trim() != "") {
+                    targetLifeUnit = requestAttributes.getAttributeStringValue("newTargetLifeUnit").trim()
                 }
             }
 
-            if (requestAttributes.getAttributeStringValue("equipTargetLife")) {
-                if (requestAttributes.getAttributeStringValue("equipTargetLife").trim() != "") {
-                    equipTargetLife = requestAttributes.getAttributeStringValue("equipTargetLife")
+            if (requestAttributes.getAttributeStringValue("newTargetLife")) {
+                if (requestAttributes.getAttributeStringValue("newTargetLife").trim() != "") {
+                    equipTargetLife = requestAttributes.getAttributeStringValue("newTargetLife")
                 }
             }
-
-            log.info("ars targetLifeUnit: $targetLifeUnit")
-            log.info("ars equipTargetLife: $equipTargetLife")
-            log.info("ars equipmentNo: $equipmentNo")
 
             if (equipmentNo) {
                 MSF071Rec msf071Rec = new MSF071Rec()
@@ -99,6 +94,12 @@ class updateEquipTargetLife extends GenericScriptPlugin implements GenericScript
                         }
                     }
                 }
+
+                log.info("ars targetLifeUnit: $targetLifeUnit")
+                log.info("ars equipTargetLife: $equipTargetLife")
+                log.info("ars equipmentNo: $equipmentNo")
+                log.info("ars UserNo: ${securityToken.getUserId()}")
+                
                 result.addAttribute("equipTargetLife", equipTargetLife)
                 result.addAttribute("targetLifeUnit", targetLifeUnit)
                 result.addAttribute("lastModEmp", securityToken.getUserId())
