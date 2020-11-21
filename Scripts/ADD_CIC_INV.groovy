@@ -25,7 +25,7 @@ import com.mincom.ellipse.errors.Error;
 import com.mincom.ellipse.errors.UnlocalisedError
 import com.mincom.ellipse.errors.CobolMessages;
 
-public class ADD_CIC_INV_INV extends GenericScriptPlugin implements GenericScriptExecute{
+public class ADD_CIC_INV extends GenericScriptPlugin implements GenericScriptExecute{
 	InitialContext initial = new InitialContext()
 	Object CAISource = initial.lookup("java:jboss/datasources/ApplicationDatasource")
 	def sql = new Sql(CAISource)

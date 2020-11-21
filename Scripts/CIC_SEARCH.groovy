@@ -4,7 +4,6 @@
  * 20190201 - a9ra5213 - Ricky Afriano - KPC UPGRADE Ellipse 8
  *            Initial Coding - Search CIC in ELL38I Detail Screen 
  **/
-package KPC
 import java.text.DecimalFormat
 import java.util.Date
 import java.util.List
@@ -35,7 +34,7 @@ import com.mincom.ellipse.errors.Error
 import com.mincom.ellipse.errors.CobolMessages
 import com.mincom.ellipse.*
 
-public class CIC_SEARCH extends GenericScriptPlugin implements GenericScriptExecuteForCollection, GenericScriptUpdate, GenericScriptCreate, GenericScriptDelete{
+public class CIC_SEARCH extends GenericScriptPlugin implements GenericScriptExecuteForCollection, GenericScriptUpdate, GenericScriptCreate, GenericScriptDelete, GenericScriptExecute{
 	InitialContext initial = new InitialContext()
 	Object CAISource = initial.lookup("java:jboss/datasources/ApplicationDatasource")
 	def sql = new Sql(CAISource)
@@ -52,10 +51,10 @@ public class CIC_SEARCH extends GenericScriptPlugin implements GenericScriptExec
 	String Errexcpt = "";
 	Integer LastIndext = 0;
 	String StrErr = "";
-	
-	public GenericScriptResults executeForCollection(SecurityToken securityToken, RequestAttributes requestAttributes,
+
+	GenericScriptResults executeForCollection(SecurityToken securityToken, RequestAttributes requestAttributes,
 		Integer maxNumberOfObjects, RestartAttributes restartAttributes) throws FatalException {
-		log.info("Execute Colection CIC_SEARCH : " + version )
+		log.info("Execute Collection CIC_SEARCH : " + version )
 		GenericScriptResults results = new GenericScriptResults()
 		RequestAttributes reqAtt = requestAttributes
 		
@@ -169,7 +168,8 @@ public class CIC_SEARCH extends GenericScriptPlugin implements GenericScriptExec
 		}
 		return results
 	}
-	public GenericScriptResults create(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
+
+	GenericScriptResults create(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
 	throws FatalException {
 		log.info("Create CIC_SEARCH : " + version )
 		GenericScriptResults results = new GenericScriptResults()
@@ -179,7 +179,8 @@ public class CIC_SEARCH extends GenericScriptPlugin implements GenericScriptExec
 		results.add(result)
 		return results
 	}
-	public GenericScriptResults update(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
+
+	GenericScriptResults update(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
 	throws FatalException {
 		log.info("Update CIC_SEARCH : " + version )
 		GenericScriptResults results = new GenericScriptResults()
@@ -189,7 +190,8 @@ public class CIC_SEARCH extends GenericScriptPlugin implements GenericScriptExec
 		results.add(result)
 		return results
 	}
-	public GenericScriptResults delete(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
+
+	GenericScriptResults delete(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings)
 	throws FatalException {
 		log.info("Delete CIC_SEARCH : " + version )
 		GenericScriptResults results = new GenericScriptResults()
@@ -198,6 +200,157 @@ public class CIC_SEARCH extends GenericScriptPlugin implements GenericScriptExec
 		results.add(result)
 		return results
 	}
+
+	GenericScriptResults execute(SecurityToken securityToken, List<RequestAttributes> requestAttributes, Boolean returnWarnings) throws FatalException {
+		log.info("Execute ADD_CIC_INV : " + version )
+		GenericScriptResults results = new GenericScriptResults()
+		GenericScriptResult result = new GenericScriptResult()
+		RequestAttributes reqAtt = requestAttributes[0]
+
+		String CNT_NO
+		String INV_NO
+		String CIC_NO
+
+		INV_NO = reqAtt.getAttributeStringValue("detInvNo");
+		CNT_NO = reqAtt.getAttributeStringValue("detCntNo");
+
+		BigDecimal INV_VAL = 0;
+		BigDecimal CIC_INV_VAL = 0;
+		BigDecimal BALANCE = 0;
+
+		requestAttributes.eachWithIndex {RequestAttributes reqAttItem, Integer index ->
+			//Validate Contract No
+			def QRY1;
+			QRY1 = sql.firstRow("select * from msf384 where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) ");
+			//log.info ("FIND CONTRACT  : " + QRY1);
+			if(QRY1.equals(null)) {
+				StrErr = "INVALID CONTRACT NUMBER / DOESN'T EXIST"
+				SetErrMes();
+				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
+				err.setFieldId("creCntNo")
+				result.addError(err)
+				results.add(result)
+				RollErrMes();
+				return results
+			}
+			//Validate CIC INV No
+			def QRY3;
+			QRY3 = sql.firstRow("select * from aca.kpf38i where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CIC_INVOICE)) = upper(trim('"+INV_NO+"')) ");
+			log.info ("FIND CIC INV  : ");
+			if(QRY3.equals(null)) {
+				StrErr = "INVOICE NUMBER DOES NOT EXIST"
+				SetErrMes();
+				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
+				err.setFieldId("detInvNo")
+				result.addError(err)
+				results.add(result)
+				RollErrMes();
+				return results
+			}
+			if(!QRY3.CIC_INV_ST.trim().equals("")) {
+				StrErr = "CIC INVOICE STATUS MUST BE SPACE"
+				SetErrMes();
+				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
+				err.setFieldId("detInvNo")
+				result.addError(err)
+				results.add(result)
+				RollErrMes();
+				return results
+			}
+			INV_VAL = QRY3.INVOICE_VAL
+			//Validate CIC NO
+			CIC_NO = reqAttItem.getAttributeStringValue("grd2CicNo").toString();
+			def QRY2;
+			QRY2 = sql.firstRow("select * from ACA.KPF38F where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
+			//log.info ("FIND CIC  : " + QRY2);
+			if(QRY2.equals(null)) {
+				StrErr = "INVALID CIC NUMBER / DOESN'T EXIST"
+				SetErrMes();
+				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
+				err.setFieldId("grd2CicNo")
+				result.addError(err)
+				results.add(result)
+				RollErrMes();
+				return results
+			}else {
+				if(!QRY2.CIC_STATUS.trim().equals("2")) {
+					StrErr = "CIC STATUS SHOULD BE ACCEPT"
+					SetErrMes();
+					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
+					err.setFieldId("grd2CicNo")
+					result.addError(err)
+					results.add(result)
+					RollErrMes();
+					return results
+				}
+				if(QRY2.CIC_INVOICE.trim().equals("")) {
+					try
+					{
+						String QueryUpdate = ("update ACA.KPF38F set CIC_INVOICE = ? where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and CIC_NO = '"+CIC_NO+"'");
+						sql.execute(QueryUpdate,[INV_NO]);
+					} catch (Exception  e) {
+						log.info ("Exception is : " + e);
+						StrErr = "EXCEPTION UPDATE ACA.KPF38F : ";
+						SetErrMes();
+						com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541);
+						result.addError(err);
+						results.add(result);
+						RollErrMes();
+						return results
+					}
+				}else {
+					StrErr = "CIC ALREADY INVOICED!"
+					SetErrMes();
+					com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
+					err.setFieldId("grd2CicNo")
+					result.addError(err)
+					results.add(result)
+					RollErrMes();
+					return results
+				}
+			}
+		}
+		//RECALCULATE BALANCE
+		log.info ("RECALCULATE BALANCE: ");
+		def QRY1;
+		QRY1 = sql.firstRow("select sum(ACT_COST) SUM_ACT_COST from ACA.KPF38F where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and upper(trim(CIC_INVOICE)) = upper(trim('"+INV_NO+"')) ");
+		if(QRY1.SUM_ACT_COST.equals(null)) {
+			StrErr = "INVALID CIC INVOICE NUMBER / DOESN'T EXIST"
+			SetErrMes();
+			com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541)
+			err.setFieldId("detInvNo")
+			result.addError(err)
+			results.add(result)
+			RollErrMes();
+			return results
+		}else {
+			try
+			{
+				CIC_INV_VAL = 0;
+				BALANCE = 0;
+				BALANCE = INV_VAL - QRY1.SUM_ACT_COST
+				CIC_INV_VAL = QRY1.SUM_ACT_COST
+				log.info ("TOTAL_CIC_VAL: " + CIC_INV_VAL);
+				log.info ("BALANCE: " + BALANCE);
+				String QueryUpdate = ("update ACA.KPF38i set TOTAL_CIC_VAL = ?,CIC_BALANCE = ? where DSTRCT_CODE = '"+securityToken.getDistrict()+"' and upper(trim(CONTRACT_NO)) = upper(trim('"+CNT_NO+"')) and upper(trim(CIC_INVOICE)) = upper(trim('"+INV_NO+"')) ");
+				sql.execute(QueryUpdate,[QRY1.SUM_ACT_COST,BALANCE]);
+			} catch (Exception  e) {
+				log.info ("Exception is : " + e);
+				StrErr = "EXCEPTION UPDATE ACA.KPF38I : ";
+				SetErrMes();
+				com.mincom.ellipse.errors.Error err = new com.mincom.ellipse.errors.Error(CobolMessages.ID_8541);
+				result.addError(err);
+				results.add(result);
+				RollErrMes();
+				return results
+			}
+		}
+		result.addAttribute("detTotCicVal", CIC_INV_VAL);
+		result.addAttribute("detBal", BALANCE);
+		results.add(result)
+		return results
+	}
+
 	private String SetErrMes(){
 		String Qerr = "UPDATE msf010 set TABLE_DESC = ? where TABLE_type = 'ER' and TABLE_CODE = '8541'";
 		try
@@ -207,6 +360,7 @@ public class CIC_SEARCH extends GenericScriptPlugin implements GenericScriptExec
 			log.info ("Exception is : " + e);
 		}
 	}
+
 	private String RollErrMes(){
 		StrErr = "ERROR -"
 		String Qerr = "UPDATE msf010 set TABLE_DESC = ? where TABLE_type = 'ER' and TABLE_CODE = '8541'";
@@ -217,7 +371,8 @@ public class CIC_SEARCH extends GenericScriptPlugin implements GenericScriptExec
 			log.info ("Exception is : " + e);
 		}
 	}
-	public def GetNowDateTime() {
+
+	def GetNowDateTime() {
 		Date InPer = new Date();
 		
 		Calendar cal = Calendar.getInstance();

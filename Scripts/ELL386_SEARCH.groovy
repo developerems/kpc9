@@ -429,7 +429,7 @@ public class ELL386_SEARCH extends GenericScriptPlugin implements GenericScriptE
 			log.info ("Exception is : " + e);
 		}
 	}
-	public def GetNowDateTime() {
+		def GetNowDateTime() {
 		Date InPer = new Date();
 		
 		Calendar cal = Calendar.getInstance();

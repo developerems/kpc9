@@ -48,7 +48,8 @@ class EnvoyGatherService_preCommit extends ServiceHook{
 		log.info("Hooks EnvoyGatherService_preCommit onPreExecute logging.version: $hookVersion")
 		GatheringDTO d = (GatheringDTO)input
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd")
-		//int panjang = 
+		//int panjang =
+
 		List<Attribute> custAttribs = d.getCustomAttributes()
 		custAttribs.each{Attribute customAttribute ->
 			log.info ("attrName : " + customAttribute.getName());
@@ -80,9 +81,19 @@ class EnvoyGatherService_preCommit extends ServiceHook{
 	public Object onPostExecute(Object input, Object result) {
 		log.info("Hooks EnvoyGatherService_preCommit onPostExecute logging.version: ${hookVersion}")
 		log.info("planUseDatenya adalah " +planUseDate)
+
+		GatheringDTO d = (GatheringDTO)input
+		GatherableDTO[] gatherableDTOs = d.getGatherableItems()
+		log.info("--- ARS gatherableDTOs: $gatherableDTOs")
+		gatherableDTOs.each {GatherableDTO it ->
+			log.info("--- ARS Input CostingGeneralLedgerAccountA: ${it.getCostingGeneralLedgerAccountA().getValue()}")
+			log.info("--- ARS Input CostingWorkOrderNumberA: ${it.getCostingWorkOrderNumberA().getValue()}")
+		}
+
 		GatheringServiceResult r = (GatheringServiceResult) result
 		String gathid = r.getGatheringDTO().getGatheringId().getValue()
 		String gathid2 = gathid.substring(0, 10) //inclusive , exclusive
+
 		//GatherableDTO[] e = new GatherableDTO()
 		/*GatherableServiceResult[] e = new GatherableServiceResult()
 		String gathid = r.getGatheringDTO().getGatheringId().getValue()
